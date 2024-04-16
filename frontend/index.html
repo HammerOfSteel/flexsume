@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexsume</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Flexsume!</h1>
+
+        <!-- Dashboard View -->
+        <div id="dashboard">
+            <h2>Dashboard</h2>
+            <div>
+                <h3>Competencies</h3>
+                <ul id="competencies-list"></ul>
+                <button id="add-competency">Add Competency</button>
+                <div id="competency-form" style="display: none;">
+                    <input type="text" id="competency-name" placeholder="Name">
+                    <input type="text" id="competency-description" placeholder="Description">
+                    <input type="text" id="competency-proficiency-level" placeholder="Proficiency Level">
+                    <button id="submit-competency">Submit</button>
+                </div>
+            </div>
+            <div>
+                <h3>Experiences</h3>
+                <ul id="experiences-list"></ul>
+                <button id="add-experience">Add Experience</button>
+                <div id="experience-form" style="display: none;">
+                    <input type="text" id="experience-title" placeholder="Title">
+                    <input type="text" id="experience-company" placeholder="Company">
+                    <input type="text" id="experience-location" placeholder="Location">
+                    <input type="date" id="experience-start-date" placeholder="Start Date">
+                    <input type="date" id="experience-end-date" placeholder="End Date">
+                    <textarea id="experience-description" placeholder="Description"></textarea>
+                    <button id="submit-experience">Submit</button>
+                </div>
+            </div>
+            <div>
+                <h3>Projects</h3>
+                <ul id="projects-list"></ul>
+                <button id="add-project">Add Project</button>
+                <div id="project-form" style="display: none;">
+                    <input type="text" id="project-title" placeholder="Title">
+                    <textarea id="project-description" placeholder="Description"></textarea>
+                    <input type="date" id="project-start-date" placeholder="Start Date">
+                    <input type="date" id="project-end-date" placeholder="End Date">
+                    <input type="text" id="project-url" placeholder="URL">
+                    <button id="submit-project">Submit</button>
+                </div>
+            </div>
+            <!-- Button to open the modal -->
+            <button id="open-creator-modal">Create Resume</button>
+        </div>
+
+        <!-- Creator Modal -->
+        <div id="creator-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Resume Creator</h2>
+                <div>
+                    <label for="template">Select a Template:</label>
+                    <select id="template">
+                        <option value="modern">modern</option>
+                        <option value="classic">classic</option>
+                    </select>
+                </div>
+                <div>
+                    <h3>Selected Data</h3>
+                    <ul id="selected-data"></ul>
+                </div>
+                <div>
+                    <h3>Available Data</h3>
+                    <ul id="available-data"></ul>
+                </div>
+                <button id="export-pdf">Export to PDF</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/jspdf.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/creator.js"></script>
+</body>
+</html>

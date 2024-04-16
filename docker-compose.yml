@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000" 
+  
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+  
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=flexsume
+      - POSTGRES_PASSWORD=flexsume_password
+      - POSTGRES_DB=flexsume_db

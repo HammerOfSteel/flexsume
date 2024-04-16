@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ resume_data.name }}</title>
+    <!-- Add your CSS styles here -->
+</head>
+<body>
+    <h1>{{ resume_data.name }}</h1>
+    <p>{{ resume_data.description }}</p>
+
+    {% for section in resume_data.sections %}
+    <div>
+        <h2>{{ section.name }}</h2>
+        <!-- Render the section content here -->
+    </div>
+    {% endfor %}
+</body>
+</html>
