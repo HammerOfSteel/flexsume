@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flexsume</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.3/purify.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="css/creator.css">
 </head>
 <body>
     <div class="container">
@@ -69,19 +73,77 @@
                     </select>
                 </div>
                 <div>
-                    <h3>Selected Data</h3>
-                    <ul id="selected-data"></ul>
+                    <label for="resume-title">Resume Title:</label>
+                    <input type="text" id="resume-title">
                 </div>
-                <div>
-                    <h3>Available Data</h3>
-                    <ul id="available-data"></ul>
+                <div id="resume-preview">
+                    <!-- Resume preview will be dynamically generated here -->
                 </div>
+                <button id="save-resume">Save</button>
                 <button id="export-pdf">Export to PDF</button>
             </div>
         </div>
     </div>
-    <script src="js/jspdf.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/creator.js"></script>
+    <script>
+        window.html2canvas = html2canvas;
+        var jsPDF;
+        window.onload = function() {
+            jsPDF = window.jspdf.jsPDF;
+        };
+        
+        // Function to export the resume to PDF
+        async function exportResumeToPDF() {
+            var resumePreview = document.getElementById("resume-preview");
+            ResumeTitle = document.getElementById("resume-title").value;
+
+            // Remove the red "x" elements from the resume preview
+            var removeItems = resumePreview.querySelectorAll(".remove-item");
+            removeItems.forEach(function(item) {
+                item.style.display = "none";
+            });
+
+            // Create a new jsPDF instance with orientation and units
+            var doc = new jsPDF({
+                orientation: 'p', 
+                unit: 'px',
+                format: 'a4'
+            });
+
+            // Adjust the scale in html2canvas to ensure the capture is high quality
+            html2canvas(resumePreview, { scale: 3 }).then(function(canvas) {
+                var imgWidth = doc.internal.pageSize.getWidth();
+                var pageHeight = doc.internal.pageSize.getHeight();
+                var imgHeight = canvas.height * imgWidth / canvas.width;
+                var heightLeft = imgHeight;
+
+                // Add a title to the PDF
+                doc.setFontSize(22);
+
+                var position = 40; // initial y-coordinate position for images
+
+                // The image height is greater than page height, add new pages and split the image
+                doc.addImage(canvas.toDataURL("image/jpeg"), 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight; // top position of the next image part
+                    doc.addPage();
+                    doc.addImage(canvas.toDataURL("image/jpeg"), 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                // Save the PDF file
+                doc.save("resume.pdf");
+
+                // Restore the red "x" elements in the resume preview
+                removeItems.forEach(function(item) {
+                    item.style.display = "block";
+                });
+            });
+        }
+        document.getElementById('export-pdf').addEventListener('click', exportResumeToPDF);
+    </script>
 </body>
 </html>

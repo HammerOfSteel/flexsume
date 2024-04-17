@@ -1,3 +1,8 @@
+// creator.js
+let competencies = [];
+let experiences = [];
+let projects = [];
+
 // Get the modal element
 const modal = document.getElementById('creator-modal');
 
@@ -24,8 +29,8 @@ window.addEventListener('click', (event) => {
     }
 });
 
-// Function to load and display the available data in the modal
-async function loadAvailableData() {
+// Function to load and display the resume preview in the modal
+async function loadResumePreview() {
     try {
         // Make API calls to fetch competencies, experiences, and projects
         const competenciesResponse = await fetch('http://localhost:8000/competencies');
@@ -33,48 +38,193 @@ async function loadAvailableData() {
         const projectsResponse = await fetch('http://localhost:8000/projects');
 
         if (competenciesResponse.ok && experiencesResponse.ok && projectsResponse.ok) {
-            const competencies = await competenciesResponse.json();
-            const experiences = await experiencesResponse.json();
-            const projects = await projectsResponse.json();
+            competencies = await competenciesResponse.json();
+            experiences = await experiencesResponse.json();
+            projects = await projectsResponse.json();
+            console.log(competencies, experiences, projects);
 
-            // Update the available data list in the modal
-            updateList('available-data', [...competencies, ...experiences, ...projects]);
+            // Generate the resume preview HTML based on the selected template
+            const resumePreviewHTML = generateResumePreview(competencies, experiences, projects);
+
+            // Update the resume preview in the modal
+            document.getElementById('resume-preview').innerHTML = resumePreviewHTML;
         } else {
-            console.error('Failed to load available data');
+            console.error('Failed to load resume data');
         }
     } catch (error) {
         console.error('Error:', error);
     }
 }
 
-// Function to update a list in the modal
-function updateList(listId, items) {
-    const list = document.getElementById(listId);
-    list.innerHTML = '';
+// Function to generate the resume preview HTML based on the selected template
+function generateResumePreview(competencies, experiences, projects) {
+    const selectedTemplate = document.getElementById('template').value;
 
-    items.forEach(item => {
-        const listItem = document.createElement('li');
-        listItem.textContent = item.name || item.title;
-        listItem.addEventListener('click', () => {
-            // Toggle selection of the item
-            listItem.classList.toggle('selected');
-        });
-        list.appendChild(listItem);
-    });
+    // Generate the HTML based on the selected template
+    let resumePreviewHTML = '';
+    let resumeTitle = document.getElementById('resume-title').value;
+    if (selectedTemplate === 'modern') {
+        resumePreviewHTML = `
+            <style>
+                .resume-preview.modern {
+                    font-family: 'Arial', sans-serif;
+                    color: #333;
+                    background-color: #fff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .resume-preview.modern h2 {
+                    color: #0056b3;
+                    border-bottom: 2px solid #0056b3;
+                }
+                .resume-preview.modern ul {
+                    list-style: none;
+                    padding: 0;
+                }
+                .resume-preview.modern li {
+                    margin-bottom: 10px;
+                    font-size: 16px;
+                    line-height: 1.6;
+                }
+                .resume-preview.modern .remove-item {
+                    margin-left: 10px;
+                    color: red;
+                    cursor: pointer;
+                }
+            </style>
+            <div class="resume-preview modern">
+                <h1>${resumeTitle}</h1>
+                <h2>Competencies</h2>
+                <ul>
+                    ${competencies.map(competency => `
+                        <li>
+                        <h3>${competency.proficiency_level} ${competency.name} - ${competency.description}</h3>
+                            <span class="remove-item" data-id="${competency.id}" data-type="competency">&times;</span>
+                        </li>
+                    `).join('')}
+                </ul>
+                <h2>Experiences</h2>
+                <ul>
+                    ${experiences.map(experience => `
+                        <li>
+                        <h3>${experience.title} at ${experience.company} - (${experience.start_date} - ${experience.end_date}) in ${experience.location}</h3>
+                            <span class="remove-item" data-id="${experience.id}" data-type="experience">&times;</span>
+                        </li>
+                    `).join('')}
+                </ul>
+                <h2>Projects</h2>
+                <ul>
+                    ${projects.map(project => `
+                        <li>
+                        <h3>${project.title} - ${project.description} - (${project.start_date} - ${project.end_date})</h3>
+                            <span class="remove-item" data-id="${project.id}" data-type="project">&times;</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    } else if (selectedTemplate === 'classic') {
+        resumePreviewHTML = `
+            <style>
+                .resume-preview.classic {
+                    font-family: 'Times New Roman', serif;
+                    color: #000;
+                    background-color: #f4f4f9;
+                    padding: 20px;
+                    border: 1px solid #ccc;
+                }
+                .resume-preview.classic h2 {
+                    color: #000;
+                    border-bottom: 1px solid #000;
+                }
+                .resume-preview.classic ul {
+                    list-style-type: square;
+                    padding-left: 20px;
+                }
+                .resume-preview.classic li {
+                    margin-bottom: 5px;
+                    font-size: 14px;
+                    line-height: 1.5;
+                }
+                .resume-preview.classic .remove-item {
+                    margin-left: 10px;
+                    color: red;
+                    cursor: pointer;
+                }
+            </style>
+            <div class="resume-preview classic">
+                <h1>${resumeTitle}</h1>
+                <h2>Competencies</h2>
+                <ul>
+                    ${competencies.map(competency => `
+                        <li>
+                        <h3>${competency.proficiency_level} ${competency.name} - ${competency.description}</h3>
+                            <span class="remove-item" data-id="${competency.id}" data-type="competency">&times;</span>
+                        </li>
+                    `).join('')}
+                </ul>
+                <h2>Experiences</h2>
+                <ul>
+                    ${experiences.map(experience => `
+                        <li>
+                        <h3>${experience.title} at ${experience.company} - (${experience.start_date} - ${experience.end_date}) in ${experience.location}</h3>
+                            <span class="remove-item" data-id="${experience.id}" data-type="experience">&times;</span>
+                        </li>
+                    `).join('')}
+                </ul>
+                <h2>Projects</h2>
+                <ul>
+                    ${projects.map(project => `
+                        <li>
+                        <h3>${project.title} - ${project.description} - (${project.start_date} - ${project.end_date})</h3>
+                            <span class="remove-item" data-id="${project.id}" data-type="project">&times;</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    return resumePreviewHTML;
 }
 
-// Function to get the selected data from the modal
-function getSelectedData() {
-    const selectedItems = document.querySelectorAll('#available-data li.selected');
-    const selectedData = Array.from(selectedItems).map(item => item.textContent);
-    return selectedData;
+
+// Function to handle removing an item from the resume preview
+function removeItemFromPreview(event) {
+    if (event.target.classList.contains('remove-item')) {
+        const itemId = event.target.dataset.id;
+        const itemType = event.target.dataset.type;
+
+        // Remove the item from the resume preview
+        event.target.parentNode.remove();
+
+        // Update the resume data based on the removed item
+        if (itemType === 'competency') {
+            // Remove the competency from the competencies array
+            competencies = competencies.filter(competency => competency.id !== itemId);
+        } else if (itemType === 'experience') {
+            // Remove the experience from the experiences array
+            experiences = experiences.filter(experience => experience.id !== itemId);
+        } else if (itemType === 'project') {
+            // Remove the project from the projects array
+            projects = projects.filter(project => project.id !== itemId);
+        }
+    }
 }
 
-// Function to create a new resume
-// Function to create a new resume
-async function createResume(resumeData, selectedTemplate) {
+// Function to save the resume to the database
+async function saveResume() {
+    const resumeData = {
+        name: 'My Resume',
+        description: 'A resume created using Flexsume',
+        sections: [],
+        competencies: competencies,
+        experiences: experiences,
+        projects: projects
+    };
+
     try {
-        // Create the resume first
         const response = await fetch('http://localhost:8000/resumes/', {
             method: 'POST',
             headers: {
@@ -84,73 +234,19 @@ async function createResume(resumeData, selectedTemplate) {
         });
 
         if (response.ok) {
-            const newResume = await response.json();
-            console.log('New resume created:', newResume);
-
-            // Send the resume data and selected template to the PDF generation API
-            const pdfResponse = await fetch('http://localhost:8000/generate-pdf', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    resumeData: {
-                        name: resumeData.name,
-                        description: resumeData.description,
-                        sections: resumeData.sections.map(section => ({
-                            section_type: section.section_type,
-                            order: section.order
-                        }))
-                    },
-                    selected_template: selectedTemplate
-                })
-            });
-
-            if (pdfResponse.ok) {
-                const pdfBlob = await pdfResponse.blob();
-                const pdfUrl = URL.createObjectURL(pdfBlob);
-
-                // Create a temporary link and trigger the download
-                const downloadLink = document.createElement('a');
-                downloadLink.href = pdfUrl;
-                downloadLink.download = 'resume.pdf';
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-
-                console.log('PDF downloaded successfully');
-            } else {
-                console.error('Failed to generate PDF');
-            }
+            console.log('Resume saved successfully');
         } else {
-            console.error('Failed to create resume');
+            console.error('Failed to save resume');
         }
     } catch (error) {
         console.error('Error:', error);
     }
 }
-// Add event listener to the "Export to PDF" button
-document.getElementById('export-pdf').addEventListener('click', () => {
-    // Collect selected data and template
-    const selectedData = getSelectedData();
-    const selectedTemplate = document.getElementById('template').value;
 
-    // Create a new resume with the selected data and template
-    const resumeData = {
-        name: 'My Resume',
-        description: 'A resume created using Flexsume',
-        user_id: 1, // Set the appropriate user_id
-        created_at: new Date().toISOString().slice(0, 10),
-        updated_at: new Date().toISOString().slice(0, 10),
-        sections: selectedData.map((item, index) => ({
-            section_type: 'custom',
-            section_id: index + 1,
-            order: index + 1,
-            user_id: 1 // Set the appropriate user_id
-        }))
-    };
-    createResume(resumeData, selectedTemplate);
-});
+// Add event listeners
+document.getElementById('template').addEventListener('change', loadResumePreview);
+document.getElementById('resume-preview').addEventListener('click', removeItemFromPreview);
+document.getElementById('save-resume').addEventListener('click', saveResume);
 
-// Load the available data when the modal is opened
-openModalBtn.addEventListener('click', loadAvailableData);
+// Load the resume preview when the modal is opened
+openModalBtn.addEventListener('click', loadResumePreview);

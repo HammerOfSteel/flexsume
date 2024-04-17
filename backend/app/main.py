@@ -18,6 +18,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 from fpdf import FPDF, HTMLMixin
 from io import BytesIO
+import html
 logging.basicConfig(level=logging.DEBUG)
 
 models.Base.metadata.create_all(bind=engine)
@@ -25,9 +26,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 app = FastAPI()
 
 # Configure CORS
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "*",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -141,44 +148,12 @@ class Section(BaseModel):
     section_type: str
     order: int
 
-class ResumePDF(FPDF, HTMLMixin):
-    pass
-
 class ResumeData(BaseModel):
     name: str = Field(default="John Doe")
     description: str
-    sections: List[Section]
-
-def create_pdf(resume_data: ResumeData, selected_template: str):
-    pdf = ResumePDF()
-    pdf.add_page()
-
-    # Load and render the HTML template based on the selected template
-    template_path = f"templates/{selected_template}.html"
-    with open(template_path, 'r', encoding='utf-8') as file:
-        template_html = file.read()
-
-    # Replace placeholders with resume data
-    rendered_html = template_html.replace('{{name}}', resume_data.name)
-    rendered_html = rendered_html.replace('{{description}}', resume_data.description)
-    sections_html = ''.join([f'<li>{section.section_type}</li>' for section in resume_data.sections])
-    rendered_html = rendered_html.replace('{{#sections}}{{/sections}}', sections_html)
-
-    # Write the rendered HTML to the PDF
-    pdf.write_html(rendered_html)
-
-    # Save the PDF to a BytesIO buffer
-    pdf_bytes = pdf.output(dest='S').encode('latin-1')
-    return pdf_bytes
-
-
-@app.post("/generate-pdf")
-async def generate_pdf_endpoint(resume_data: ResumeData, selected_template: str = "classic"):
-    pdf_bytes = create_pdf(resume_data, selected_template)
-    return Response(pdf_bytes, headers={
-        'Content-Disposition': 'attachment; filename="resume.pdf"'
-    })
-
+    competencies: List[dict]
+    experiences: List[dict]
+    projects: List[dict]
         
 @app.post("/api/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -266,11 +241,28 @@ def read_projects(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 @app.post("/resumes/", response_model=schemas.Resume)
 def create_resume(resume: schemas.ResumeCreate, db: Session = Depends(get_db)):
-    db_resume = models.Resume(**resume.dict())
-    db_resume.user_id = 1  # Set the appropriate user_id
-    db_resume.created_at = date.today()
-    db_resume.updated_at = date.today()
+    db_resume = models.Resume(
+        user_id=1,  # Set the appropriate user_id
+        name=resume.name,
+        description=resume.description,
+        created_at=date.today(),
+        updated_at=date.today()
+    )
     db.add(db_resume)
+    db.commit()
+    db.refresh(db_resume)
+
+    for section in resume.sections:
+        db_section = models.ResumeSection(
+            resume_id=db_resume.id,
+            section_type=section.section_type,
+            section_id=section.section_id,
+            order=section.order,
+            created_at=date.today(),
+            updated_at=date.today()
+        )
+        db.add(db_section)
+
     db.commit()
     db.refresh(db_resume)
     return db_resume

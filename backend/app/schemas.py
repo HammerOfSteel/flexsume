@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
+from typing import List, Optional
 
 class UserBase(BaseModel):
     email: str
@@ -94,9 +95,16 @@ class ResumeBase(BaseModel):
     name: str
     description: str
 
-class ResumeCreate(ResumeBase):
-    pass
+class ResumeSectionCreate(BaseModel):
+    section_type: str
+    section_id: int
+    order: int
 
+class ResumeCreate(BaseModel):
+    name: str
+    description: str
+    sections: List[ResumeSectionCreate]
+    
 class Resume(ResumeBase):
     id: int
     user_id: int
