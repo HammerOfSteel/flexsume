@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flexsume</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.3/purify.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -75,6 +76,8 @@
                 <div>
                     <label for="resume-title">Resume Title:</label>
                     <input type="text" id="resume-title">
+                    <!-- input for resume profile image -->
+                    <input style="border-radius: 24px;" name="photo" type="file" accept="image/*" onchange="document.getElementById('output').src = window.URL.createObjectURL(this.files[0])">
                 </div>
                 <div id="resume-preview">
                     <!-- Resume preview will be dynamically generated here -->
@@ -144,6 +147,32 @@
             });
         }
         document.getElementById('export-pdf').addEventListener('click', exportResumeToPDF);
+
+        $(document).ready(function() {
+            var currentSrc = $('#Picture').attr('src');
+            if(currentSrc==null || currentSrc==""){        $('#Picture').attr('src','http://i38.photobucket.com/albums/e149/eloginko/profile_male_large_zpseedb2954.jpg');
+                                                
+                                                $("#Picture").on('click', function() {$("#imgInp").trigger('click')})
+            }
+
+
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    
+                    reader.onload = function (e) {
+                        $('#Picture').attr('src', e.target.result);
+                    }
+                    
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+            
+            $("#imgInp").change(function(){
+                readURL(this);
+            });
+
+        });
     </script>
 </body>
 </html>

@@ -95,6 +95,7 @@ function generateResumePreview(competencies, experiences, projects) {
             </style>
             <div class="resume-preview modern">
                 <h1>${resumeTitle}</h1>
+                <img style="border-radius: 50%;" id="output" width="100" height="100">
                 <h2>Competencies</h2>
                 <ul>
                     ${competencies.map(competency => `
@@ -155,6 +156,8 @@ function generateResumePreview(competencies, experiences, projects) {
             </style>
             <div class="resume-preview classic">
                 <h1>${resumeTitle}</h1>
+                <img style="border-radius: 50%;" id="output" width="100" height="100">
+
                 <h2>Competencies</h2>
                 <ul>
                     ${competencies.map(competency => `
