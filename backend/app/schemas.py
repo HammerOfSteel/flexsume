@@ -55,6 +55,26 @@ class Experience(ExperienceBase):
     class Config:
         from_attributes = True
 
+class EducationBase(BaseModel):
+    title: str
+    institute: str
+    location: str
+    start_date: date
+    end_date: date
+    description: str
+
+class EducationCreate(EducationBase):
+    pass
+
+class Education(EducationBase):
+    id: int
+    user_id: int
+    created_at: date
+    updated_at: date
+
+    class Config:
+        from_attributes = True
+
 class ProjectBase(BaseModel):
     title: str
     description: str

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app.models import Base, User, Competency, Experience, Project, Resume, ResumeSection
+from app.models import Base, User, Competency, Experience, Project, Resume, ResumeSection, Education
 from app.database import SessionLocal, engine
 from app import models, schemas
 from pydantic import BaseModel
@@ -115,6 +115,34 @@ def create_sample_data():
     db.add_all(sample_experiences)
     db.commit()
 
+    # Create sample education for the user
+    sample_education = [
+        models.Education(
+            user_id=sample_user.id,
+            title="Software Engineer",
+            institute="University of California, Berkeley",
+            location="Berkeley",
+            start_date=date(2020, 1, 1),
+            end_date=date(2022, 12, 31),
+            description="Studied computer science at the University of California, Berkeley",
+            created_at=date.today(),
+            updated_at=date.today()
+        ),
+        models.Education(
+            user_id=sample_user.id,
+            title="Data Analyst",
+            institute="Certification for Data Analyst",
+            location="Udemy",
+            start_date=date(2018, 6, 1),
+            end_date=date(2019, 12, 31),
+            description="Obtained a certification in data analysis",
+            created_at=date.today(),
+            updated_at=date.today()
+        )
+    ]
+    db.add_all(sample_education)
+    db.commit()
+
     # Create sample projects for the user
     sample_projects = [
         models.Project(
@@ -222,6 +250,25 @@ def create_experience(experience: schemas.ExperienceCreate, db: Session = Depend
 def read_experiences(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     experiences = db.query(models.Experience).offset(skip).limit(limit).all()
     return experiences
+
+
+@app.post("/educations/", response_model=schemas.Education)
+def create_education(education: schemas.EducationCreate, db: Session = Depends(get_db)):
+    db_education = models.Education(**education.dict())
+    db_education.user_id = 1  # Set the appropriate user_id
+    db_education.created_at = date.today()
+    db_education.updated_at = date.today()
+    db.add(db_education)
+    db.commit()
+    db.refresh(db_education)
+    return db_education
+
+
+@app.get("/educations/", response_model=list[schemas.Education])
+def read_educations(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    educations = db.query(models.Education).offset(skip).limit(limit).all()
+    return educations
+
 
 @app.post("/projects/", response_model=schemas.Project)
 def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)):

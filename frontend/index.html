@@ -45,6 +45,20 @@
                 </div>
             </div>
             <div>
+                <h3>Education</h3>
+                <ul id="education-list"></ul>
+                <button id="add-education">Add Education</button>
+                <div id="education-form" style="display: none;">
+                    <input type="text" id="education-title" placeholder="Title">
+                    <input type="text" id="education-institute" placeholder="Institute">
+                    <input type="text" id="education-location" placeholder="Location">
+                    <input type="date" id="education-start-date" placeholder="Start Date">
+                    <input type="date" id="education-end-date" placeholder="End Date">
+                    <textarea id="education-description" placeholder="Description"></textarea>
+                    <button id="submit-education">Submit</button>
+                </div>
+            </div>
+            <div>
                 <h3>Projects</h3>
                 <ul id="projects-list"></ul>
                 <button id="add-project">Add Project</button>
@@ -71,13 +85,12 @@
                     <select id="template">
                         <option value="modern">modern</option>
                         <option value="classic">classic</option>
+                        <option value="cypoint">cypoint</option>
                     </select>
                 </div>
                 <div>
                     <label for="resume-title">Resume Title:</label>
                     <input type="text" id="resume-title">
-                    <!-- input for resume profile image -->
-                    <input style="border-radius: 24px;" name="photo" type="file" accept="image/*" onchange="document.getElementById('output').src = window.URL.createObjectURL(this.files[0])">
                 </div>
                 <div id="resume-preview">
                     <!-- Resume preview will be dynamically generated here -->
@@ -98,53 +111,33 @@
         
         // Function to export the resume to PDF
         async function exportResumeToPDF() {
-            var resumePreview = document.getElementById("resume-preview");
-            ResumeTitle = document.getElementById("resume-title").value;
+            // Ensure all remove buttons are hidden
+            document.querySelectorAll(".remove-item").forEach(item => item.style.display = "none");
 
-            // Remove the red "x" elements from the resume preview
-            var removeItems = resumePreview.querySelectorAll(".remove-item");
-            removeItems.forEach(function(item) {
-                item.style.display = "none";
-            });
-
-            // Create a new jsPDF instance with orientation and units
-            var doc = new jsPDF({
-                orientation: 'p', 
-                unit: 'px',
+            const pages = document.querySelectorAll(".resume-preview.cypoint .page");
+            const doc = new jsPDF({
+                orientation: 'p',
+                unit: 'pt',
                 format: 'a4'
             });
 
-            // Adjust the scale in html2canvas to ensure the capture is high quality
-            html2canvas(resumePreview, { scale: 3 }).then(function(canvas) {
-                var imgWidth = doc.internal.pageSize.getWidth();
-                var pageHeight = doc.internal.pageSize.getHeight();
-                var imgHeight = canvas.height * imgWidth / canvas.width;
-                var heightLeft = imgHeight;
-
-                // Add a title to the PDF
-                doc.setFontSize(22);
-
-                var position = 40; // initial y-coordinate position for images
-
-                // The image height is greater than page height, add new pages and split the image
-                doc.addImage(canvas.toDataURL("image/jpeg"), 'JPEG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight; // top position of the next image part
-                    doc.addPage();
-                    doc.addImage(canvas.toDataURL("image/jpeg"), 'JPEG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
-
-                // Save the PDF file
-                doc.save("resume.pdf");
-
-                // Restore the red "x" elements in the resume preview
-                removeItems.forEach(function(item) {
-                    item.style.display = "block";
+            for (let i = 0; i < pages.length; i++) {
+                await html2canvas(pages[i], { scale: 3, useCORS: true }).then((canvas) => {
+                    if (i > 0) {
+                        doc.addPage();
+                    }
+                    const imgData = canvas.toDataURL("image/jpeg");
+                    const imgWidth = doc.internal.pageSize.getWidth();
+                    const imgHeight = doc.internal.pageSize.getHeight();
+                    doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
                 });
-            });
+            }
+
+            // Save the PDF
+            doc.save('resume.pdf');
+
+            // Show remove buttons again after generating PDF
+            document.querySelectorAll(".remove-item").forEach(item => item.style.display = "block");
         }
         document.getElementById('export-pdf').addEventListener('click', exportResumeToPDF);
 

@@ -4,16 +4,19 @@ async function loadDashboardData() {
         // Make API calls to fetch competencies, experiences, and projects
         const competenciesResponse = await fetch('http://localhost:8000/competencies');
         const experiencesResponse = await fetch('http://localhost:8000/experiences');
+        const educationResponse = await fetch('http://localhost:8000/educations');
         const projectsResponse = await fetch('http://localhost:8000/projects');
 
-        if (competenciesResponse.ok && experiencesResponse.ok && projectsResponse.ok) {
+        if (competenciesResponse.ok && experiencesResponse.ok && projectsResponse.ok && educationResponse.ok) {
             const competencies = await competenciesResponse.json();
             const experiences = await experiencesResponse.json();
+            const educations = await educationResponse.json();
             const projects = await projectsResponse.json();
 
             // Update the respective lists in the dashboard
             updateList('competencies-list', competencies);
             updateList('experiences-list', experiences);
+            updateList('education-list', educations);
             updateList('projects-list', projects);
         } else {
             console.error('Failed to load dashboard data');
@@ -93,6 +96,32 @@ async function createExperience(experienceData) {
     }
 }
 
+// Function to create a new experience
+async function createEducation(educationData) {
+    try {
+        const response = await fetch('http://localhost:8000/educations/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(educationData)
+        });
+
+        if (response.ok) {
+            const newEducation = await response.json();
+            // Append the new experience to the existing list
+            const educationsList = document.getElementById('educations-list');
+            const listItem = document.createElement('li');
+            listItem.textContent = newEducation.title;
+            educationsList.appendChild(listItem);
+        } else {
+            console.error('Failed to create experience');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 // Function to create a new project
 async function createProject(projectData) {
     try {
@@ -162,6 +191,31 @@ document.getElementById('submit-experience').addEventListener('click', () => {
 
     createExperience(experienceData);
     document.getElementById('experience-form').style.display = 'none';
+});
+
+document.getElementById('add-education').addEventListener('click', () => {
+    document.getElementById('education-form').style.display = 'block';
+});
+
+document.getElementById('submit-education').addEventListener('click', () => {
+    const educationTitle = document.getElementById('education-title').value;
+    const educationInstitute = document.getElementById('education-institute').value;
+    const educationLocation = document.getElementById('education-location').value;
+    const educationStartDate = document.getElementById('education-start-date').value;
+    const educationEndDate = document.getElementById('education-end-date').value;
+    const educationDescription = document.getElementById('education-description').value;
+
+    const educationData = {
+        title: educationTitle,
+        institute: educationInstitute,
+        location: educationLocation,
+        start_date: educationStartDate,
+        end_date: educationEndDate,
+        description: educationDescription
+    };
+
+    createExperience(educationData);
+    document.getElementById('education-form').style.display = 'none';
 });
 
 document.getElementById('add-project').addEventListener('click', () => {
