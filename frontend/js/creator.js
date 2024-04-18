@@ -413,13 +413,32 @@ function removeItemFromPreview(event) {
 
 // Function to save the resume to the database
 async function saveResume() {
+    const resumeName = document.getElementById('resume-title').value;
+    const resumeDescription = document.getElementById('resume-description').value;
+
+    // Preparing section data
+    const sections = [
+        ...experiences.map((exp, index) => ({
+            section_type: 'experience',
+            section_id: exp.id,  // Assuming `id` is provided in the experience objects
+            order: index + 1
+        })),
+        ...educations.map((edu, index) => ({
+            section_type: 'education',
+            section_id: edu.id,  // Assuming `id` is provided in the education objects
+            order: index + 1 + experiences.length  // Continue ordering after experiences
+        })),
+        ...projects.map((proj, index) => ({
+            section_type: 'project',
+            section_id: proj.id,  // Assuming `id` is provided in the project objects
+            order: index + 1 + experiences.length + educations.length  // Continue ordering after experiences and educations
+        }))
+    ];
+
     const resumeData = {
-        name: 'My Resume',
-        description: 'A resume created using Flexsume',
-        sections: [],
-        competencies: competencies,
-        experiences: experiences,
-        projects: projects
+        name: resumeName,
+        description: resumeDescription,
+        sections: sections
     };
 
     try {
@@ -432,14 +451,98 @@ async function saveResume() {
         });
 
         if (response.ok) {
-            console.log('Resume saved successfully');
+            const result = await response.json();
+            console.log('Resume saved successfully', result);
+            alert('Resume saved successfully!');
         } else {
-            console.error('Failed to save resume');
+            console.error('Failed to save resume', response);
         }
     } catch (error) {
         console.error('Error:', error);
     }
 }
+
+
+// Function to populate the dropdown with existing resumes
+async function populateResumeDropdown() {
+    const dropdown = document.getElementById('existing-resumes');
+    try {
+        const response = await fetch('http://localhost:8000/resumes/');
+        const resumes = await response.json();
+
+        // Clear the dropdown
+        dropdown.innerHTML = '';
+        // Populate the dropdown with resumes
+        resumes.forEach(resume => {
+            const option = document.createElement('option');
+            option.value = resume.id;
+            option.textContent = resume.name;
+            dropdown.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error fetching resumes:', error);
+    }
+}
+
+
+async function loadSectionDetails(sectionType, sectionId) {
+    const response = await fetch(`http://localhost:8000/${sectionType}s/${sectionId}`);
+    if (response.ok) {
+        return response.json();
+    } else {
+        throw new Error(`Failed to fetch details for ${sectionType} with ID ${sectionId}`);
+    }
+}
+
+async function loadResumeIntoPreview(resumeId) {
+    try {
+        const response = await fetch(`http://localhost:8000/resumes/${resumeId}`);
+        if (!response.ok) throw new Error('Failed to fetch resume data');
+        const resume = await response.json();
+
+        // Reset the arrays
+        competencies = [];
+        experiences = [];
+        educations = [];
+        projects = [];
+
+        // Load details for each section
+        for (const section of resume.sections) {
+            const details = await loadSectionDetails(section.section_type, section.section_id);
+
+            if (section.section_type === 'competency') {
+                competencies.push(details);
+            } else if (section.section_type === 'experience') {
+                experiences.push(details);
+            } else if (section.section_type === 'education') {
+                educations.push(details);
+            } else if (section.section_type === 'project') {
+                projects.push(details);
+            }
+        }
+        console.log(competencies, experiences, educations, projects);
+        document.getElementById('resume-title').value = resume.name;
+        document.getElementById('resume-description').value = resume.description;
+
+        // Generate the resume preview
+        const resumePreviewHTML = generateResumePreview(competencies, experiences, educations, projects);
+        document.getElementById('resume-preview').innerHTML = resumePreviewHTML;
+    } catch (error) {
+        console.error('Error loading resume into preview:', error);
+    }
+}
+
+
+
+// Event listener for when a resume is selected from the dropdown
+document.getElementById('existing-resumes').addEventListener('change', function() {
+    console.log("Selected resume:", this.value);
+    const resumeId = this.value;
+    loadResumeIntoPreview(resumeId);
+});
+
+// Call this function when the modal is opened to populate the dropdown
+populateResumeDropdown();
 
 // Add event listeners
 document.getElementById('template').addEventListener('change', loadResumePreview);

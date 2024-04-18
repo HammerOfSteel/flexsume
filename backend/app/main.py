@@ -169,6 +169,87 @@ def create_sample_data():
     db.add_all(sample_projects)
     db.commit()
 
+    # save some resumes containing sample data with experiences, educations, and projects
+    resume1 = models.Resume(
+        user_id=sample_user.id,
+        name="Resume 1",
+        description="A resume with some experiences and projects",
+        created_at=date.today(),
+        updated_at=date.today()
+    )
+    db.add(resume1)
+    db.commit()
+    db.refresh(resume1)
+
+    resume1_sections = [
+        models.ResumeSection(
+            resume_id=resume1.id,
+            section_type="experience",
+            section_id=1,
+            order=1,
+            created_at=date.today(),
+            updated_at=date.today()
+        ),
+        models.ResumeSection(
+            resume_id=resume1.id,
+            section_type="education",
+            section_id=1,
+            order=2,
+            created_at=date.today(),
+            updated_at=date.today()
+        ),
+        models.ResumeSection(
+            resume_id=resume1.id,
+            section_type="project",
+            section_id=1,
+            order=3,
+            created_at=date.today(),
+            updated_at=date.today()
+        )
+    ]
+    db.add_all(resume1_sections)
+    db.commit()
+
+    # another resume:
+    resume2 = models.Resume(
+        user_id=sample_user.id,
+        name="Resume 2",
+        description="Another resume with some experiences and projects",
+        created_at=date.today(),
+        updated_at=date.today()
+    )
+    db.add(resume2)
+    db.commit()
+    db.refresh(resume2)
+
+    resume2_sections = [
+        models.ResumeSection(
+            resume_id=resume2.id,
+            section_type="experience",
+            section_id=1,
+            order=1,
+            created_at=date.today(),
+            updated_at=date.today()
+        ),
+        models.ResumeSection(
+            resume_id=resume2.id,
+            section_type="education",
+            section_id=1,
+            order=2,
+            created_at=date.today(),
+            updated_at=date.today() # add this line
+        ),
+        models.ResumeSection(
+            resume_id=resume2.id,
+            section_type="project",
+            section_id=1,
+            order=3,
+            created_at=date.today(),
+            updated_at=date.today()
+        )
+    ]
+    db.add_all(resume2_sections)
+    db.commit()
     db.close()
 
 
@@ -181,6 +262,7 @@ class ResumeData(BaseModel):
     description: str
     competencies: List[dict]
     experiences: List[dict]
+    educations: List[dict]
     projects: List[dict]
         
 @app.post("/api/login")
@@ -289,7 +371,7 @@ def read_projects(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 @app.post("/resumes/", response_model=schemas.Resume)
 def create_resume(resume: schemas.ResumeCreate, db: Session = Depends(get_db)):
     db_resume = models.Resume(
-        user_id=1,  # Set the appropriate user_id
+        user_id=1,  # You might want to dynamically set this based on logged-in user
         name=resume.name,
         description=resume.description,
         created_at=date.today(),
@@ -299,6 +381,7 @@ def create_resume(resume: schemas.ResumeCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_resume)
 
+    # Handling sections
     for section in resume.sections:
         db_section = models.ResumeSection(
             resume_id=db_resume.id,
@@ -311,13 +394,21 @@ def create_resume(resume: schemas.ResumeCreate, db: Session = Depends(get_db)):
         db.add(db_section)
 
     db.commit()
-    db.refresh(db_resume)
+
     return db_resume
+
 
 @app.get("/resumes/", response_model=list[schemas.Resume])
 def read_resumes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     resumes = db.query(models.Resume).offset(skip).limit(limit).all()
     return resumes
+
+@app.get("/resumes/{resume_id}", response_model=schemas.Resume)
+def read_resume(resume_id: int, db: Session = Depends(get_db)):
+    resume = db.query(models.Resume).filter(models.Resume.id == resume_id).first()
+    if resume is None:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    return resume
 
 @app.post("/resume-sections/", response_model=schemas.ResumeSection)
 def create_resume_section(resume_section: schemas.ResumeSectionCreate, db: Session = Depends(get_db)):
@@ -334,3 +425,35 @@ def create_resume_section(resume_section: schemas.ResumeSectionCreate, db: Sessi
 def read_resume_sections(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     resume_sections = db.query(models.ResumeSection).offset(skip).limit(limit).all()
     return resume_sections
+
+# FastAPI route to get a specific competency by ID
+@app.get("/competencies/{competency_id}", response_model=schemas.Competency)
+def read_competency(competency_id: int, db: Session = Depends(get_db)):
+    competency = db.query(models.Competency).filter(models.Competency.id == competency_id).first()
+    if competency is None:
+        raise HTTPException(status_code=404, detail="Competency not found")
+    return competency
+
+# FastAPI route to get a specific experience by ID
+@app.get("/experiences/{experience_id}", response_model=schemas.Experience)
+def read_experience(experience_id: int, db: Session = Depends(get_db)):
+    experience = db.query(models.Experience).filter(models.Experience.id == experience_id).first()
+    if experience is None:
+        raise HTTPException(status_code=404, detail="Experience not found")
+    return experience
+
+# FastAPI route to get a specific education by ID
+@app.get("/educations/{education_id}", response_model=schemas.Education)
+def read_education(education_id: int, db: Session = Depends(get_db)):
+    education = db.query(models.Education).filter(models.Education.id == education_id).first()
+    if education is None:
+        raise HTTPException(status_code=404, detail="Education not found")
+    return education
+
+# FastAPI route to get a specific project by ID
+@app.get("/projects/{project_id}", response_model=schemas.Project)
+def read_project(project_id: int, db: Session = Depends(get_db)):
+    project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project

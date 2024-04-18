@@ -81,6 +81,12 @@
                 <span class="close">&times;</span>
                 <h2>Resume Creator</h2>
                 <div>
+                    <label for="existing-resumes">Select Existing Resume:</label>
+                    <select id="existing-resumes">
+                        <!-- Options will be populated dynamically by JavaScript -->
+                    </select>
+                </div>
+                <div>
                     <label for="template">Select a Template:</label>
                     <select id="template">
                         <option value="modern">modern</option>
@@ -91,6 +97,10 @@
                 <div>
                     <label for="resume-title">Resume Title:</label>
                     <input type="text" id="resume-title">
+                </div>
+                <div>
+                    <label for="resume-description">Resume Description:</label>
+                    <input type="text" id="resume-description">
                 </div>
                 <div id="resume-preview">
                     <!-- Resume preview will be dynamically generated here -->
