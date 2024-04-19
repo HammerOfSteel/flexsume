@@ -1,23 +1,18 @@
-// Get the login form element
 const loginForm = document.getElementById('login-form');
 
-// Add event listener to the login form submission
 loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Prevent the default form submission
+    e.preventDefault();
 
-    // Get the email and password values from the form
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // Create an object with the login credentials
     const loginData = {
-        email: email,
+        username: email,
         password: password
     };
 
     try {
-        // Make a POST request to the login API endpoint
-        const response = await fetch('/api/login', {
+        const response = await fetch('http://localhost:8000/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -26,12 +21,10 @@ loginForm.addEventListener('submit', async (e) => {
         });
 
         if (response.ok) {
-            // Login successful, redirect to the dashboard page
             window.location.href = 'index.html';
         } else {
-            // Login failed, display an error message
             const errorData = await response.json();
-            displayErrorMessage(errorData.message);
+            displayErrorMessage(errorData.detail);
         }
     } catch (error) {
         console.error('Error:', error);
@@ -39,10 +32,6 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Function to display an error message
 function displayErrorMessage(message) {
-    const errorElement = document.createElement('p');
-    errorElement.className = 'error-message';
-    errorElement.textContent = message;
-    loginForm.appendChild(errorElement);
+    alert(message);
 }

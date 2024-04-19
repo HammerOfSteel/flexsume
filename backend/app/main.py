@@ -297,14 +297,19 @@ class ResumeData(BaseModel):
     experiences: List[dict]
     educations: List[dict]
     projects: List[dict]
+
+
+class LoginSchema(BaseModel):
+    username: str
+    password: str
         
 @app.post("/api/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends()):
+def login(login_data: LoginSchema):
     # Hardcoded username and password
-    valid_username = "terry"
-    valid_password = "goleman"
+    valid_username = "user@example.com"
+    valid_password = "password"
 
-    if form_data.username == valid_username and form_data.password == valid_password:
+    if login_data.username == valid_username and login_data.password == valid_password:
         # Authentication successful
         return {"access_token": "dummy_token", "token_type": "bearer"}
     else:
@@ -314,7 +319,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Invalid email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
+    
 
 @app.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
