@@ -110,7 +110,7 @@ async function createEducation(educationData) {
         if (response.ok) {
             const newEducation = await response.json();
             // Append the new experience to the existing list
-            const educationsList = document.getElementById('educations-list');
+            const educationsList = document.getElementById('education-list');
             const listItem = document.createElement('li');
             listItem.textContent = newEducation.title;
             educationsList.appendChild(listItem);
@@ -214,7 +214,7 @@ document.getElementById('submit-education').addEventListener('click', () => {
         description: educationDescription
     };
 
-    createExperience(educationData);
+    createEducation(educationData);
     document.getElementById('education-form').style.display = 'none';
 });
 

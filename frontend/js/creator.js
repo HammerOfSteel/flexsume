@@ -172,10 +172,10 @@ function generateResumePreview(competencies, experiences, educations, projects) 
                 </ul>
             </div>
         `;
-    } else if (selectedTemplate === 'cypoint') {
+    } else if (selectedTemplate === 'cypoint-eng') {
         let templateStyles = `
             .resume-preview.cypoint {
-                font-family: Arial, sans-serif;
+                font-family: 'Barlow Condensed', sans-serif;
                 color: #000;
                 background-color: #fff;
                 padding: 20px;
@@ -270,6 +270,7 @@ function generateResumePreview(competencies, experiences, educations, projects) 
             #output:hover {
                 opacity: 0.8;
             }
+
         `;
         listItemStyle = 'cypoint';  // Use a consistent class name strategy
         resumePreviewHTML = `
@@ -335,14 +336,18 @@ function generateResumePreview(competencies, experiences, educations, projects) 
                 <div class="page">
                     <div class="section">
                         <div class="section-title">Education & Knowledge</div>
+                        <br>
                         <div class="section-content page-3">
                             <h2 contenteditable="true" id="jobTitle2">My Job title/role (DevOps Engineer etc...)</h2>
                             <p contenteditable="true" id="jobTitle2Desc">Short description of the role and how I apply it</p>
+                            <br>
                             <h2>Education & Certificates:</h2>
                             <ul>
                             ${educations.map(education => `
                                 <li>
-                                    <h3>${education.title} at ${education.institute} - (${education.start_date} - ${education.end_date}) in ${education.location}</h3>
+                                    <h3>${education.title}, ${education.institute}, ${education.location} </h3>
+                                    <p>${education.start_date} - ${education.end_date}</p>
+                                    <p>${education.description}</p>
                                     <span class="remove-item" data-id="${education.id}" data-type="experience">&times;</span>
                                 </li>
                             `).join('')}
@@ -351,16 +356,228 @@ function generateResumePreview(competencies, experiences, educations, projects) 
                             <ul>
                             ${projects.map(project => `
                                 <li>
-                                    <h3>${project.title} - ${project.description} - (${project.start_date} - ${project.end_date})</h3>
+                                    <h3>${project.title}</h3>
+                                    <p>${project.description}</p>
+                                    <h3><a href="${project.url}">${project.url}</a></h3>
+                                    <p>${project.start_date} - ${project.end_date}</p>
                                     <span class="remove-item" data-id="${project.id}" data-type="project">&times;</span>
                                 </li>
                             `).join('')}
                             </ul>
-                            <h2>Competencies</h2>
+                            <h2>Competencies:</h2>
                             <ul>
                             ${competencies.map(competency => `
                                 <li>
-                                    <h3>${competency.proficiency_level} ${competency.name} - ${competency.description}</h3>
+                                    <h3>${competency.proficiency_level} ${competency.name}</h3>
+                                    <p>${competency.description}</p>
+                                    <span class="remove-item" data-id="${competency.id}" data-type="competency">&times;</span>
+                                </li>
+                            `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                    <img style="margin-left: 35%; margin-top: 5%;" src="/images/CV_LOGO_FOOTER.jpg" alt="Footer Logo" width="200" height="40">
+                </div>
+            </div>
+        `;
+    } else if (selectedTemplate === 'cypoint-swe') {
+        let templateStyles = `
+            .resume-preview.cypoint {
+                font-family: 'Barlow Condensed', sans-serif;
+                color: #000;
+                background-color: #fff;
+                padding: 20px;
+                border: 1px solid #ccc;
+            }
+            .resume-preview.cypoint h1, .resume-preview.cypoint h2, .resume-preview.cypoint h3, .resume-preview.cypoint p {
+                margin: 10px 0;
+            }
+            .resume-preview.cypoint ul {
+                list-style-type: none;
+                padding-left: 0;
+            }
+            .resume-preview.cypoint li {
+                margin-bottom: 5px;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            .resume-preview.cypoint .remove-item {
+                margin-left: 10px;
+                color: red;
+                cursor: pointer;
+            }
+            .resume-preview.cypoint .section-title {
+                font-weight: bold;
+                text-align: center;
+                font-size: 3em;
+                margin-bottom: 10px;
+            }
+            .resume-preview.cypoint .section-content {
+                margin-left: 20px;
+                font-size: 1.2em;
+                margin-top: 5%;
+            }
+            .resume-preview.cypoint .experience-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+            .resume-preview.cypoint .experience-table td {
+                padding: 5px;
+                vertical-align: top;
+            }
+            .resume-preview.cypoint .experience-table td:first-child {
+                font-weight: bold;
+                width: 240px;
+            }
+            .resume-preview.cypoint .section {
+                page-break-inside: avoid;
+            }
+            .resume-preview.cypoint .page {
+                width: 595px; /* A4 width in pixels */
+                min-height: 842px; /* A4 height in pixels */
+                margin: auto;
+                page-break-after: always;
+                position: relative;
+                box-sizing: border-box;
+                padding: 20px;
+            }
+            .resume-preview.cypoint .page-1-content {
+                text-align: center;
+                margin-top: 35%;
+            }
+            .resume-preview.cypoint .page-1 {
+                background-image: url('/images/CV_BG_P1.jpg');
+                background-size: cover;
+                background-repeat: no-repeat;
+            }
+            .resume-preview.cypoint .page-2 {
+                margin-left: 5%;
+                margin-top: 5%;
+            }
+            .page-3 {
+                text-align: left;
+            }
+            div.header-section h1, div.header-section h3, div.section-content p, div.section-content h2 {
+                border: none;
+                outline: none;
+                background: transparent;
+            }
+            
+            div.header-section h1:focus, div.header-section h3:focus, div.section-content p:focus, div.section-content h2:focus {
+                outline: none;
+                border-bottom: 1px solid #ccc; /* Only show a bottom border when focused */
+            }
+            
+            /* Hide the border when printing or saving to PDF */
+            @media print {
+                div.header-section h1, div.header-section h3, div.section-content p, div.section-content h2 {
+                    border: none;
+                }
+            }
+            #output:hover {
+                opacity: 0.8;
+            }
+
+        `;
+        listItemStyle = 'cypoint';  // Use a consistent class name strategy
+        resumePreviewHTML = `
+            <style>
+                ${templateStyles}
+            </style>
+            <div class="resume-preview ${listItemStyle}">
+                <div class="page page-1">
+                    <div class="page-1-content">
+                        <input id="imageInput" name="photo" type="file" accept="image/*" onchange="document.getElementById('output').src = window.URL.createObjectURL(this.files[0])" style="display: none;">
+                        <label for="imageInput">
+                        <img src="/images/placeholder.jpeg" id="output" alt="Image Placeholder" width="200" height="200" style="cursor: pointer;" />
+                        </label>
+                        <div class="header-section">
+                            <h1 contenteditable="true" id="Name">Förnamn Efternamn</h1>
+                            <h3 contenteditable="true" id="jobTitle">Min Jobbtitel (DevOps Engineer etc...)</h3>
+                        </div>
+                        <img style="margin-bottom: 3%;" src="/images/CV_LOGO_P1.png" alt="Logo"><br>
+                        <div class="section">
+                            <div class="section-content">
+                                <p contenteditable="true" id="Summary">Sammanfatting här....</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="page">
+                    <div class="section page-2">
+                        <div class="section-title">UPPDRAGSEXEMPEL.</div>
+                        <div class="section-content">
+                            ${experiences.map(experience => `
+                                <table class="experience-table">
+                                    <tr>
+                                        <td>Kund:</td>
+                                        <td>${experience.company}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Roll:</td>
+                                        <td>${experience.title}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tidperiod:</td>
+                                        <td>${experience.start_date} - ${experience.end_date}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tekniker och metoder:</td>
+                                        <td>DevOps, Agile, Scrum, SAFE, ITIL...</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Projektbeskrivning:</td>
+                                        <td>${experience.description}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <span class="remove-item" data-id="${experience.id}" data-type="experience">&times;</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <img style="margin-left: 35%; margin-top: 5%;" src="/images/CV_LOGO_FOOTER.jpg" alt="Footer Logo" width="200" height="40">
+                </div>
+                <div class="page">
+                    <div class="section">
+                        <div class="section-title">UTBILDNINGAR & KUNSKAPER</div>
+                        <br>
+                        <div class="section-content page-3">
+                            <h2 contenteditable="true" id="jobTitle2">Min Jobbtitel (DevOps Engineer etc...)</h2>
+                            <p contenteditable="true" id="jobTitle2Desc">Kort beskrivning av mitt yrke och hur jag jobbar.</p>
+                            <br>
+                            <h2>Utbidning & Cerfitikat:</h2>
+                            <ul>
+                            ${educations.map(education => `
+                                <li>
+                                    <h3>${education.title}, ${education.institute}, ${education.location} </h3>
+                                    <p>${education.start_date} - ${education.end_date}</p>
+                                    <p>${education.description}</p>
+                                    <span class="remove-item" data-id="${education.id}" data-type="experience">&times;</span>
+                                </li>
+                            `).join('')}
+                            </ul>
+                            <h2>Projekt:</h2>
+                            <ul>
+                            ${projects.map(project => `
+                                <li>
+                                    <h3>${project.title}</h3>
+                                    <p>${project.description}</p>
+                                    <h3><a href="${project.url}">${project.url}</a></h3>
+                                    <p>${project.start_date} - ${project.end_date}</p>
+                                    <span class="remove-item" data-id="${project.id}" data-type="project">&times;</span>
+                                </li>
+                            `).join('')}
+                            </ul>
+                            <h2>Kompetenser:</h2>
+                            <ul>
+                            ${competencies.map(competency => `
+                                <li>
+                                    <h3>${competency.proficiency_level} ${competency.name}</h3>
+                                    <p>${competency.description}</p>
                                     <span class="remove-item" data-id="${competency.id}" data-type="competency">&times;</span>
                                 </li>
                             `).join('')}
@@ -410,11 +627,14 @@ function removeItemFromPreview(event) {
 }
 
 
-
 // Function to save the resume to the database
 async function saveResume() {
     const resumeName = document.getElementById('resume-title').value;
     const resumeDescription = document.getElementById('resume-description').value;
+    const resumeFullname = document.getElementById('Name').innerText;
+    const resumeSummary = document.getElementById('Summary').innerText;
+    const resumeJobTitle = document.getElementById('jobTitle').innerText;
+    const resumeJobTitleDesc = document.getElementById('jobTitle2Desc').innerText;
 
     // Preparing section data
     const sections = [
@@ -432,16 +652,27 @@ async function saveResume() {
             section_type: 'project',
             section_id: proj.id,  // Assuming `id` is provided in the project objects
             order: index + 1 + experiences.length + educations.length  // Continue ordering after experiences and educations
+        })),
+        ...competencies.map((comp, index) => ({
+            section_type: 'competency',
+            section_id: comp.id,  // Assuming `id` is provided in the project objects
+            order: index + 1 + experiences.length + educations.length + projects.length
         }))
     ];
 
     const resumeData = {
         name: resumeName,
         description: resumeDescription,
+        fullname: resumeFullname,
+        summary: resumeSummary,
+        jobtitle: resumeJobTitle,
+        jobtitledescription: resumeJobTitleDesc,
         sections: sections
     };
 
     try {
+        console.log('Sending resume data:', resumeData);
+
         const response = await fetch('http://localhost:8000/resumes/', {
             method: 'POST',
             headers: {
@@ -450,12 +681,16 @@ async function saveResume() {
             body: JSON.stringify(resumeData)
         });
 
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+
         if (response.ok) {
-            const result = await response.json();
-            console.log('Resume saved successfully', result);
-            alert('Resume saved successfully!');
+            const newResume = await response.json();
+            console.log('Resume saved successfully:', newResume);
         } else {
-            console.error('Failed to save resume', response);
+            const errorData = await response.json();
+            console.error('Failed to save resume:', errorData);
+            console.log('Response body:', await response.text());
         }
     } catch (error) {
         console.error('Error:', error);
@@ -520,13 +755,20 @@ async function loadResumeIntoPreview(resumeId) {
                 projects.push(details);
             }
         }
-        console.log(competencies, experiences, educations, projects);
-        document.getElementById('resume-title').value = resume.name;
-        document.getElementById('resume-description').value = resume.description;
-
+        console.log(resume.fullname)
+        console.log(resume.jobtitle)
+        console.log(resume.summary)
+        console.log(resume.jobtitledescription)
         // Generate the resume preview
         const resumePreviewHTML = generateResumePreview(competencies, experiences, educations, projects);
         document.getElementById('resume-preview').innerHTML = resumePreviewHTML;
+        document.getElementById('resume-title').value = resume.name;
+        document.getElementById('resume-description').value = resume.description;
+        document.getElementById('Name').innerText = resume.fullname;
+        document.getElementById('jobTitle').innerText = resume.jobtitle;
+        document.getElementById('Summary').innerText = resume.summary;
+        document.getElementById('jobTitle2').innerText = resume.jobtitle;
+        document.getElementById('jobTitle2Desc').innerText = resume.jobtitledescription;
     } catch (error) {
         console.error('Error loading resume into preview:', error);
     }

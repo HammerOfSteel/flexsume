@@ -6,75 +6,178 @@
     <title>Flexsume</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.3/purify.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.3/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/creator.css">
+    <link href="https://fonts.cdnfonts.com/css/barlow-condensed" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/barlow" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/georgia" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Barlow', sans-serif;
+            background: linear-gradient(120deg, #a6c0fe 0%, #f68084 100%);
+            animation: GradientBackground 15s ease infinite;
+            background-size: 400% 400%;
+        }
+
+        @keyframes GradientBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        .section_cards {
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: white;
+            color: black;
+            border: 2px solid #4CAF50;
+        }
+
+        input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Welcome to Flexsume!</h1>
-
-        <!-- Dashboard View -->
         <div id="dashboard">
             <h2>Dashboard</h2>
-            <div>
+            <div class="section_cards">
                 <h3>Competencies</h3>
                 <ul id="competencies-list"></ul>
-                <button id="add-competency">Add Competency</button>
-                <div id="competency-form" style="display: none;">
+                <button onclick="toggleForm('competency-form')" id="add-competency">Add Competency</button>
+                <div id="competency-form" style="display:none;">
                     <input type="text" id="competency-name" placeholder="Name">
                     <input type="text" id="competency-description" placeholder="Description">
                     <input type="text" id="competency-proficiency-level" placeholder="Proficiency Level">
                     <button id="submit-competency">Submit</button>
                 </div>
             </div>
-            <div>
+            <div class="section_cards">
                 <h3>Experiences</h3>
                 <ul id="experiences-list"></ul>
-                <button id="add-experience">Add Experience</button>
-                <div id="experience-form" style="display: none;">
+                <button onclick="toggleForm('experience-form')" id="add-experience">Add Experience</button>
+                <div id="experience-form" style="display:none;">
                     <input type="text" id="experience-title" placeholder="Title">
                     <input type="text" id="experience-company" placeholder="Company">
                     <input type="text" id="experience-location" placeholder="Location">
-                    <input type="date" id="experience-start-date" placeholder="Start Date">
-                    <input type="date" id="experience-end-date" placeholder="End Date">
+                    <input type="date" id="experience-start-date">
+                    <input type="date" id="experience-end-date">
                     <textarea id="experience-description" placeholder="Description"></textarea>
                     <button id="submit-experience">Submit</button>
                 </div>
             </div>
-            <div>
+            <div class="section_cards">
                 <h3>Education</h3>
                 <ul id="education-list"></ul>
-                <button id="add-education">Add Education</button>
-                <div id="education-form" style="display: none;">
+                <button onclick="toggleForm('education-form')" id="add-education">Add Education</button>
+                <div id="education-form" style="display:none;">
                     <input type="text" id="education-title" placeholder="Title">
                     <input type="text" id="education-institute" placeholder="Institute">
                     <input type="text" id="education-location" placeholder="Location">
-                    <input type="date" id="education-start-date" placeholder="Start Date">
-                    <input type="date" id="education-end-date" placeholder="End Date">
+                    <input type="date" id="education-start-date">
+                    <input type="date" id="education-end-date">
                     <textarea id="education-description" placeholder="Description"></textarea>
                     <button id="submit-education">Submit</button>
                 </div>
             </div>
-            <div>
+            <div class="section_cards">
                 <h3>Projects</h3>
                 <ul id="projects-list"></ul>
-                <button id="add-project">Add Project</button>
-                <div id="project-form" style="display: none;">
+                <button onclick="toggleForm('project-form')" id="add-project">Add Project</button>
+                <div id="project-form" style="display:none;">
                     <input type="text" id="project-title" placeholder="Title">
                     <textarea id="project-description" placeholder="Description"></textarea>
-                    <input type="date" id="project-start-date" placeholder="Start Date">
-                    <input type="date" id="project-end-date" placeholder="End Date">
+                    <input type="date" id="project-start-date">
+                    <input type="date" id="project-end-date">
                     <input type="text" id="project-url" placeholder="URL">
                     <button id="submit-project">Submit</button>
                 </div>
             </div>
-            <!-- Button to open the modal -->
             <button id="open-creator-modal">Create Resume</button>
         </div>
-
+            <button id="open-creator-modal" class="create-resume-btn">Create Resume</button>
+        </div>
         <!-- Creator Modal -->
         <div id="creator-modal" class="modal">
             <div class="modal-content">
@@ -82,16 +185,15 @@
                 <h2>Resume Creator</h2>
                 <div>
                     <label for="existing-resumes">Select Existing Resume:</label>
-                    <select id="existing-resumes">
-                        <!-- Options will be populated dynamically by JavaScript -->
-                    </select>
+                    <select id="existing-resumes"></select>
                 </div>
                 <div>
                     <label for="template">Select a Template:</label>
                     <select id="template">
                         <option value="modern">modern</option>
                         <option value="classic">classic</option>
-                        <option value="cypoint">cypoint</option>
+                        <option value="cypoint-swe">cypoint svenska</option>
+                        <option value="cypoint-eng">cypoint engelska</option>
                     </select>
                 </div>
                 <div>
@@ -102,11 +204,10 @@
                     <label for="resume-description">Resume Description:</label>
                     <input type="text" id="resume-description">
                 </div>
-                <div id="resume-preview">
-                    <!-- Resume preview will be dynamically generated here -->
-                </div>
+                <div id="resume-preview"></div>
                 <button id="save-resume">Save</button>
                 <button id="export-pdf">Export to PDF</button>
+                <button onclick="exportToDocx()" id="export-docx">Export to DOCX</button>
             </div>
         </div>
     </div>
@@ -117,12 +218,31 @@
         var jsPDF;
         window.onload = function() {
             jsPDF = window.jspdf.jsPDF;
+            try {
+                console.log("Trying to ini docx using window.docx")
+                docx = window.docx;
+            }
+            catch {
+                console.log("Failed to initialize docx using window.docx, Error:")
+                console.log(e)
+            }
         };
+
+        function toggleForm(formId) {
+            var form = document.getElementById(formId);
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
         
         // Function to export the resume to PDF
         async function exportResumeToPDF() {
             // Ensure all remove buttons are hidden
             document.querySelectorAll(".remove-item").forEach(item => item.style.display = "none");
+            const resumeName = document.getElementById("resume-title").value
+            const fileName = resumeName + ".pdf"
 
             const pages = document.querySelectorAll(".resume-preview.cypoint .page");
             const doc = new jsPDF({
@@ -144,12 +264,13 @@
             }
 
             // Save the PDF
-            doc.save('resume.pdf');
+            doc.save(fileName);
 
             // Show remove buttons again after generating PDF
             document.querySelectorAll(".remove-item").forEach(item => item.style.display = "block");
         }
         document.getElementById('export-pdf').addEventListener('click', exportResumeToPDF);
+
 
         $(document).ready(function() {
             var currentSrc = $('#Picture').attr('src');
@@ -176,6 +297,52 @@
             });
 
         });
+    </script>    <script>
+        async function exportToDocx() {
+            // Ensure all remove buttons are hidden
+            document.querySelectorAll(".remove-item").forEach(item => item.style.display = "none");
+            const resumeName = document.getElementById("resume-title").value
+            const fileName = resumeName + ".docx"
+            const resumeDescription = document.getElementById("resume-description").value
+            const doc = new docx.Document({
+                    creator: "Flexsume",
+                    description: resumeDescription,
+                    title: resumeName,
+                    sections: [],
+                });
+
+            const pages = document.querySelectorAll('.page');
+            for (const page of pages) {
+                const canvas = await html2canvas(page);
+                const imgData = canvas.toDataURL("image/png");
+
+                // Ensure you split the Data URL properly and decode it
+                const base64Image = imgData.substring("data:image/png;base64,".length);
+                const imageBuffer = Uint8Array.from(atob(base64Image), c => c.charCodeAt(0));
+
+                const image = new docx.ImageRun({
+                    data: imageBuffer,
+                    transformation: {
+                        width: 595,  // width of A4 in pixels at 96 DPI
+                        height: 842  // height of A4 in pixels at 96 DPI
+                    }
+                });
+
+                const paragraph = new docx.Paragraph({
+                    children: [image]
+                });
+
+                doc.addSection({
+                    properties: {},
+                    children: [paragraph]
+                });
+            }
+
+            const blob = await docx.Packer.toBlob(doc);
+            saveAs(blob, fileName);
+            // Show remove buttons again after generating PDF
+            document.querySelectorAll(".remove-item").forEach(item => item.style.display = "block");
+        }
     </script>
 </body>
 </html>

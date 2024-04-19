@@ -114,6 +114,10 @@ class ResumeSection(ResumeSectionBase):
 class ResumeBase(BaseModel):
     name: str
     description: str
+    fullname: Optional[str]
+    jobtitle: Optional[str]
+    jobtitledescription: Optional[str]
+    summary: Optional[str]
 
 class ResumeSectionCreate(BaseModel):
     section_type: str
@@ -123,6 +127,10 @@ class ResumeSectionCreate(BaseModel):
 class ResumeCreate(BaseModel):
     name: str
     description: str
+    fullname: Optional[str]
+    jobtitle: Optional[str]
+    jobtitledescription: Optional[str]
+    summary: Optional[str]
     sections: List[ResumeSectionCreate]
     
 class Resume(ResumeBase):

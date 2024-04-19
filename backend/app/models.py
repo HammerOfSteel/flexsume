@@ -88,6 +88,10 @@ class Resume(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     name = Column(String)
     description = Column(Text)
+    fullname = Column(String)
+    jobtitle = Column(String)
+    jobtitledescription = Column(String)
+    summary = Column(Text)
     created_at = Column(Date)
     updated_at = Column(Date)
 

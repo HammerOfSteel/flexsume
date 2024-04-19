@@ -51,206 +51,235 @@ def get_db():
 @app.on_event("startup")
 def create_sample_data():
     db = SessionLocal()
-    
-    # Create a sample user
-    sample_user = models.User(
-        email="sample@example.com",
-        hashed_password="samplepassword",
-        first_name="John",
-        last_name="Doe",
-        created_at=date.today(),
-        updated_at=date.today()
-    )
-    db.add(sample_user)
-    db.commit()
-    db.refresh(sample_user)
-
-    # Create sample competencies for the user
-    sample_competencies = [
-        models.Competency(
-            user_id=sample_user.id,
-            name="Programming",
-            description="Proficient in Python and JavaScript",
-            proficiency_level="Advanced",
-            created_at=date.today(),
-            updated_at=date.today()
-        ),
-        models.Competency(
-            user_id=sample_user.id,
-            name="Database Management",
-            description="Experience with MySQL and PostgreSQL",
-            proficiency_level="Intermediate",
+    try:
+        # Create a sample user
+        sample_user = models.User(
+            email="sample@example.com",
+            hashed_password="samplepassword",
+            first_name="John",
+            last_name="Doe",
             created_at=date.today(),
             updated_at=date.today()
         )
-    ]
-    db.add_all(sample_competencies)
-    db.commit()
+        db.add(sample_user)
+        db.commit()
+        db.refresh(sample_user)
 
-    # Create sample experiences for the user
-    sample_experiences = [
-        models.Experience(
+        # Create sample competencies for the user
+        sample_competencies = [
+            models.Competency(
+                user_id=sample_user.id,
+                name="Programming",
+                description="Proficient in Python and JavaScript",
+                proficiency_level="Advanced",
+                created_at=date.today(),
+                updated_at=date.today()
+            ),
+            models.Competency(
+                user_id=sample_user.id,
+                name="Database Management",
+                description="Experience with MySQL and PostgreSQL",
+                proficiency_level="Intermediate",
+                created_at=date.today(),
+                updated_at=date.today()
+            )
+        ]
+        db.add_all(sample_competencies)
+        db.commit()
+
+        # Create sample experiences for the user
+        sample_experiences = [
+            models.Experience(
+                user_id=sample_user.id,
+                title="Software Engineer",
+                company="ABC Company",
+                location="New York",
+                start_date=date(2020, 1, 1),
+                end_date=date(2022, 12, 31),
+                description="Developed and maintained web applications",
+                created_at=date.today(),
+                updated_at=date.today()
+            ),
+            models.Experience(
+                user_id=sample_user.id,
+                title="Data Analyst",
+                company="XYZ Corporation",
+                location="London",
+                start_date=date(2018, 6, 1),
+                end_date=date(2019, 12, 31),
+                description="Analyzed and visualized data using Python",
+                created_at=date.today(),
+                updated_at=date.today()
+            )
+        ]
+        db.add_all(sample_experiences)
+        db.commit()
+
+        # Create sample education for the user
+        sample_education = [
+            models.Education(
+                user_id=sample_user.id,
+                title="Software Engineer",
+                institute="University of California, Berkeley",
+                location="Berkeley",
+                start_date=date(2020, 1, 1),
+                end_date=date(2022, 12, 31),
+                description="Studied computer science at the University of California, Berkeley",
+                created_at=date.today(),
+                updated_at=date.today()
+            ),
+            models.Education(
+                user_id=sample_user.id,
+                title="Data Analyst",
+                institute="Certification for Data Analyst",
+                location="Udemy",
+                start_date=date(2018, 6, 1),
+                end_date=date(2019, 12, 31),
+                description="Obtained a certification in data analysis",
+                created_at=date.today(),
+                updated_at=date.today()
+            )
+        ]
+        db.add_all(sample_education)
+        db.commit()
+
+        # Create sample projects for the user
+        sample_projects = [
+            models.Project(
+                user_id=sample_user.id,
+                title="Portfolio Website",
+                description="Personal portfolio website showcasing projects",
+                start_date=date(2022, 1, 1),
+                end_date=date(2022, 3, 31),
+                url="https://example.com/portfolio",
+                created_at=date.today(),
+                updated_at=date.today()
+            ),
+            models.Project(
+                user_id=sample_user.id,
+                title="Machine Learning Project",
+                description="Implemented a machine learning model for prediction",
+                start_date=date(2021, 6, 1),
+                end_date=date(2021, 8, 31),
+                url="https://github.com/example/ml-project",
+                created_at=date.today(),
+                updated_at=date.today()
+            )
+        ]
+        db.add_all(sample_projects)
+        db.commit()
+
+        # save some resumes containing sample data with experiences, educations, and projects
+        resume1 = models.Resume(
             user_id=sample_user.id,
-            title="Software Engineer",
-            company="ABC Company",
-            location="New York",
-            start_date=date(2020, 1, 1),
-            end_date=date(2022, 12, 31),
-            description="Developed and maintained web applications",
-            created_at=date.today(),
-            updated_at=date.today()
-        ),
-        models.Experience(
-            user_id=sample_user.id,
-            title="Data Analyst",
-            company="XYZ Corporation",
-            location="London",
-            start_date=date(2018, 6, 1),
-            end_date=date(2019, 12, 31),
-            description="Analyzed and visualized data using Python",
+            name="Resume 1",
+            description="A resume with some experiences and projects",
+            fullname="John Doe",
+            jobtitle="DevOps Engineer",
+            jobtitledescription="I am a DevOps Engineer with 5 years of experience",
+            summary="I am a summary with some key competencies and experiences",
             created_at=date.today(),
             updated_at=date.today()
         )
-    ]
-    db.add_all(sample_experiences)
-    db.commit()
+        db.add(resume1)
+        db.commit()
+        db.refresh(resume1)
 
-    # Create sample education for the user
-    sample_education = [
-        models.Education(
+        resume1_sections = [
+            models.ResumeSection(
+                resume_id=resume1.id,
+                section_type="experience",
+                section_id=1,
+                order=1,
+                created_at=date.today(),
+                updated_at=date.today()
+            ),
+            models.ResumeSection(
+                resume_id=resume1.id,
+                section_type="education",
+                section_id=1,
+                order=2,
+                created_at=date.today(),
+                updated_at=date.today()
+            ),
+            models.ResumeSection(
+                resume_id=resume1.id,
+                section_type="project",
+                section_id=1,
+                order=3,
+                created_at=date.today(),
+                updated_at=date.today()
+            ),
+            models.ResumeSection(
+                resume_id=resume1.id,
+                section_type="competency",
+                section_id=1,
+                order=4,
+                created_at=date.today(),
+                updated_at=date.today()
+            )
+        ]
+        db.add_all(resume1_sections)
+        db.commit()
+
+        # another resume:
+        resume2 = models.Resume(
             user_id=sample_user.id,
-            title="Software Engineer",
-            institute="University of California, Berkeley",
-            location="Berkeley",
-            start_date=date(2020, 1, 1),
-            end_date=date(2022, 12, 31),
-            description="Studied computer science at the University of California, Berkeley",
-            created_at=date.today(),
-            updated_at=date.today()
-        ),
-        models.Education(
-            user_id=sample_user.id,
-            title="Data Analyst",
-            institute="Certification for Data Analyst",
-            location="Udemy",
-            start_date=date(2018, 6, 1),
-            end_date=date(2019, 12, 31),
-            description="Obtained a certification in data analysis",
+            name="Resume 2",
+            description="Another resume with some experiences and projects",
+            fullname="John Smith",
+            jobtitle="Software Engineer",
+            jobtitledescription="Developed and maintained web applications",
+            summary="Analyzed and visualized data using Python",
             created_at=date.today(),
             updated_at=date.today()
         )
-    ]
-    db.add_all(sample_education)
-    db.commit()
+        db.add(resume2)
+        db.commit()
+        db.refresh(resume2)
 
-    # Create sample projects for the user
-    sample_projects = [
-        models.Project(
-            user_id=sample_user.id,
-            title="Portfolio Website",
-            description="Personal portfolio website showcasing projects",
-            start_date=date(2022, 1, 1),
-            end_date=date(2022, 3, 31),
-            url="https://example.com/portfolio",
-            created_at=date.today(),
-            updated_at=date.today()
-        ),
-        models.Project(
-            user_id=sample_user.id,
-            title="Machine Learning Project",
-            description="Implemented a machine learning model for prediction",
-            start_date=date(2021, 6, 1),
-            end_date=date(2021, 8, 31),
-            url="https://github.com/example/ml-project",
-            created_at=date.today(),
-            updated_at=date.today()
-        )
-    ]
-    db.add_all(sample_projects)
-    db.commit()
-
-    # save some resumes containing sample data with experiences, educations, and projects
-    resume1 = models.Resume(
-        user_id=sample_user.id,
-        name="Resume 1",
-        description="A resume with some experiences and projects",
-        created_at=date.today(),
-        updated_at=date.today()
-    )
-    db.add(resume1)
-    db.commit()
-    db.refresh(resume1)
-
-    resume1_sections = [
-        models.ResumeSection(
-            resume_id=resume1.id,
-            section_type="experience",
-            section_id=1,
-            order=1,
-            created_at=date.today(),
-            updated_at=date.today()
-        ),
-        models.ResumeSection(
-            resume_id=resume1.id,
-            section_type="education",
-            section_id=1,
-            order=2,
-            created_at=date.today(),
-            updated_at=date.today()
-        ),
-        models.ResumeSection(
-            resume_id=resume1.id,
-            section_type="project",
-            section_id=1,
-            order=3,
-            created_at=date.today(),
-            updated_at=date.today()
-        )
-    ]
-    db.add_all(resume1_sections)
-    db.commit()
-
-    # another resume:
-    resume2 = models.Resume(
-        user_id=sample_user.id,
-        name="Resume 2",
-        description="Another resume with some experiences and projects",
-        created_at=date.today(),
-        updated_at=date.today()
-    )
-    db.add(resume2)
-    db.commit()
-    db.refresh(resume2)
-
-    resume2_sections = [
-        models.ResumeSection(
-            resume_id=resume2.id,
-            section_type="experience",
-            section_id=1,
-            order=1,
-            created_at=date.today(),
-            updated_at=date.today()
-        ),
-        models.ResumeSection(
-            resume_id=resume2.id,
-            section_type="education",
-            section_id=1,
-            order=2,
-            created_at=date.today(),
-            updated_at=date.today() # add this line
-        ),
-        models.ResumeSection(
-            resume_id=resume2.id,
-            section_type="project",
-            section_id=1,
-            order=3,
-            created_at=date.today(),
-            updated_at=date.today()
-        )
-    ]
-    db.add_all(resume2_sections)
-    db.commit()
-    db.close()
+        resume2_sections = [
+            models.ResumeSection(
+                resume_id=resume2.id,
+                section_type="experience",
+                section_id=1,
+                order=1,
+                created_at=date.today(),
+                updated_at=date.today()
+            ),
+            models.ResumeSection(
+                resume_id=resume2.id,
+                section_type="education",
+                section_id=1,
+                order=2,
+                created_at=date.today(),
+                updated_at=date.today() # add this line
+            ),
+            models.ResumeSection(
+                resume_id=resume2.id,
+                section_type="project",
+                section_id=1,
+                order=3,
+                created_at=date.today(),
+                updated_at=date.today()
+            ),
+            models.ResumeSection(
+                resume_id=resume2.id,
+                section_type="competency",
+                section_id=1,
+                order=4,
+                created_at=date.today(),
+                updated_at=date.today()
+            )
+        ]
+        db.add_all(resume2_sections)
+        db.commit()
+        db.close()
+    except Exception as e:
+        print(f"Startup data already exists. Error: {e}")
+        db.rollback()
+    finally:
+        db.close()
 
 
 class Section(BaseModel):
@@ -260,6 +289,10 @@ class Section(BaseModel):
 class ResumeData(BaseModel):
     name: str = Field(default="John Doe")
     description: str
+    fullname: Optional[str]
+    jobtitle: Optional[str]
+    jobtitledescription: Optional[str]
+    summary: Optional[str]
     competencies: List[dict]
     experiences: List[dict]
     educations: List[dict]
@@ -374,6 +407,10 @@ def create_resume(resume: schemas.ResumeCreate, db: Session = Depends(get_db)):
         user_id=1,  # You might want to dynamically set this based on logged-in user
         name=resume.name,
         description=resume.description,
+        fullname=resume.fullname,
+        jobtitle=resume.jobtitle,
+        jobtitledescription=resume.jobtitledescription,
+        summary=resume.summary,
         created_at=date.today(),
         updated_at=date.today()
     )
@@ -457,3 +494,11 @@ def read_project(project_id: int, db: Session = Depends(get_db)):
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
+
+# FastAPI route to get a specific competency by ID
+@app.get("/competencys/{competency_id}", response_model=schemas.Competency)
+def read_competency(competency_id: int, db: Session = Depends(get_db)):
+    competency = db.query(models.Competency).filter(models.Competency.id == competency_id).first()
+    if competency is None:
+        raise HTTPException(status_code=404, detail="Competency not found")
+    return competency
