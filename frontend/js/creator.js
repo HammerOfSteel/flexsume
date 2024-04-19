@@ -315,10 +315,6 @@ function generateResumePreview(competencies, experiences, educations, projects) 
                                         <td>${experience.start_date} - ${experience.end_date}</td>
                                     </tr>
                                     <tr>
-                                        <td>Tech and Methodology:</td>
-                                        <td>DevOps, Agile, Scrum, SAFE, ITIL...</td>
-                                    </tr>
-                                    <tr>
                                         <td>Description:</td>
                                         <td>${experience.description}</td>
                                     </tr>
@@ -521,10 +517,6 @@ function generateResumePreview(competencies, experiences, educations, projects) 
                                     <tr>
                                         <td>Tidperiod:</td>
                                         <td>${experience.start_date} - ${experience.end_date}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Tekniker och metoder:</td>
-                                        <td>DevOps, Agile, Scrum, SAFE, ITIL...</td>
                                     </tr>
                                     <tr>
                                         <td>Projektbeskrivning:</td>
