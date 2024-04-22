@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cyclopse - Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Keania+One&display=swap" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(90deg, #b8e994, #54a0ff);
+      background-size: 200% 200%;
+      animation: gradientAnimation 10s ease infinite;
+    }
+  
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 40px;
+      background-color: #ffffff;
+      border-radius: 25px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      margin-top: 15%;
+    }
+  
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  
+    .logo img {
+      width: 100px;
+    }
+  
+    .form-group {
+      margin-bottom: 20px;
+    }
+  
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+  
+    .form-group input[type="text"],
+    .form-group input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  
+    .form-group button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4caf50;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  
+    .form-group button:hover {
+      background-color: #45a049;
+    }
+  
+    .form-group .error-message {
+      color: red;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+  
+    .form-group .success-message {
+      color: green;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    @keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex;">
+            <h1 style="font-family: 'Keania One', cursive; font-size: 4em; margin-top: 11%;">Flexsume</h1>
+        </div>
+        <center>
+          <button href="/login" onclick="window.location.href='/login'" class="btn-primary" style="padding: 2%; margin-top: 5%;border-radius: 25px;" id="login-btn">Log In with azure</button>
+        </center>
+      </form>
+      <div id="error-message" class="form-group error-message"></div>
+      <div id="success-message" class="form-group success-message"></div>
+    </div>
+    
+
+</body>
+</html>

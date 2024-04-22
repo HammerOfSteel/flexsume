@@ -10,8 +10,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.3/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/creator.css">
+    <link rel="stylesheet" href="/styles/dashboard">
+    <link rel="stylesheet" href="/styles/creator">
     <link href="https://fonts.cdnfonts.com/css/barlow-condensed" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/barlow" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/georgia" rel="stylesheet">
@@ -114,10 +114,29 @@
             text-decoration: none;
             cursor: pointer;
         }
+        .user-profile {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .user-profile h4,
+        .user-profile p {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div id="user-profile">
+            <h3 id="user-name">Loading...</h3>
+            <p id="user-email">Loading...</p>
+        </div>
         <h1>Welcome to Flexsume!</h1>
         <div id="dashboard">
             <h2>Dashboard</h2>
@@ -209,8 +228,8 @@
             </div>
         </div>
     </div>
-    <script src="js/dashboard.js"></script>
-    <script src="js/creator.js"></script>
+    <script src="/js/dashboard"></script>
+    <script src="/js/creator"></script>
     <script>
         window.html2canvas = html2canvas;
         var jsPDF;
@@ -341,6 +360,29 @@
             // Show remove buttons again after generating PDF
             document.querySelectorAll(".remove-item").forEach(item => item.style.display = "block");
         }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+        fetch('/user')
+            .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to fetch user data');
+            }
+            })
+            .then(userData => {
+            document.getElementById('user-name').textContent = userData.name || 'N/A';
+            document.getElementById('user-email').textContent = userData.email || 'N/A';
+            })
+            .catch(error => {
+            console.error('Error:', error.message);
+            // Display an error message to the user
+            const errorMessage = document.createElement('p');
+            errorMessage.textContent = 'Failed to retrieve user information. Please try again later.';
+            document.body.appendChild(errorMessage);
+            });
+        });
     </script>
 </body>
 </html>

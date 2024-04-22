@@ -19,7 +19,18 @@ from fastapi.responses import StreamingResponse
 from fpdf import FPDF, HTMLMixin
 from io import BytesIO
 import html
+import os
+import dotenv
 logging.basicConfig(level=logging.DEBUG)
+
+# load .env file
+dotenv.load_dotenv()
+
+# Constants and Application setup
+SAMPLE_USER_FIRSTNAME = os.getenv("SAMPLE_USER_FIRSTNAME")
+SAMPLE_USER_LASTNAME = os.getenv("SAMPLE_USER_LASTNAME")
+SAMPLE_USER_EMAIL = os.getenv("SAMPLE_USER_EMAIL")
+SAMPLE_USER_PASS = os.getenv("SAMPLE_USER_PASS")
 
 models.Base.metadata.create_all(bind=engine)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
@@ -54,10 +65,10 @@ def create_sample_data():
     try:
         # Create a sample user
         sample_user = models.User(
-            email="sample@example.com",
-            hashed_password="samplepassword",
-            first_name="John",
-            last_name="Doe",
+            email=SAMPLE_USER_EMAIL,
+            hashed_password=SAMPLE_USER_PASS,
+            first_name=SAMPLE_USER_FIRSTNAME,
+            last_name=SAMPLE_USER_LASTNAME,
             created_at=date.today(),
             updated_at=date.today()
         )
@@ -305,6 +316,19 @@ class LoginSchema(BaseModel):
         
 @app.post("/api/login")
 def login(login_data: LoginSchema):
+
+    # check the User in the database
+    db = SessionLocal()
+    user = db.query(models.User).filter(models.User.email == login_data.username).first()
+    if user is None or not user.check_password(login_data.password):
+        db.close()
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    db.close()
+
     # Hardcoded username and password
     valid_username = "user@example.com"
     valid_password = "password"
