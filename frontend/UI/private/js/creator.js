@@ -33,11 +33,15 @@ window.addEventListener('click', (event) => {
 // Function to load and display the resume preview in the modal
 async function loadResumePreview() {
     try {
+        const options = {
+            credentials: 'include'
+        };
+
         // Make API calls to fetch competencies, experiences, and projects
-        const competenciesResponse = await fetch('http://localhost:8000/competencies');
-        const experiencesResponse = await fetch('http://localhost:8000/experiences');
-        const educationsResponse = await fetch('http://localhost:8000/educations');
-        const projectsResponse = await fetch('http://localhost:8000/projects');
+        const competenciesResponse = await fetch('http://localhost:8000/competencies', options);
+        const experiencesResponse = await fetch('http://localhost:8000/experiences', options);
+        const educationsResponse = await fetch('http://localhost:8000/educations', options);
+        const projectsResponse = await fetch('http://localhost:8000/projects', options);
 
         if (competenciesResponse.ok && experiencesResponse.ok && projectsResponse.ok) {
             competencies = await competenciesResponse.json();
@@ -670,7 +674,8 @@ async function saveResume() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(resumeData)
+            body: JSON.stringify(resumeData),
+            credentials: 'include'
         });
 
         console.log('Response status:', response.status);
@@ -694,7 +699,9 @@ async function saveResume() {
 async function populateResumeDropdown() {
     const dropdown = document.getElementById('existing-resumes');
     try {
-        const response = await fetch('http://localhost:8000/resumes/');
+        const response = await fetch('http://localhost:8000/resumes/', {
+            credentials: 'include'
+        });
         const resumes = await response.json();
 
         // Clear the dropdown
@@ -713,7 +720,9 @@ async function populateResumeDropdown() {
 
 
 async function loadSectionDetails(sectionType, sectionId) {
-    const response = await fetch(`http://localhost:8000/${sectionType}s/${sectionId}`);
+    const response = await fetch(`http://localhost:8000/${sectionType}s/${sectionId}`, {
+        credentials: 'include'
+    });
     if (response.ok) {
         return response.json();
     } else {
@@ -723,7 +732,9 @@ async function loadSectionDetails(sectionType, sectionId) {
 
 async function loadResumeIntoPreview(resumeId) {
     try {
-        const response = await fetch(`http://localhost:8000/resumes/${resumeId}`);
+        const response = await fetch(`http://localhost:8000/resumes/${resumeId}`, {
+            credentials: 'include'
+        });
         if (!response.ok) throw new Error('Failed to fetch resume data');
         const resume = await response.json();
 
@@ -740,11 +751,11 @@ async function loadResumeIntoPreview(resumeId) {
             if (section.section_type === 'competency') {
                 competencies.push(details);
             } else if (section.section_type === 'experience') {
-                experiences.push(details);
+            experiences.push(details);
             } else if (section.section_type === 'education') {
-                educations.push(details);
+            educations.push(details);
             } else if (section.section_type === 'project') {
-                projects.push(details);
+            projects.push(details);
             }
         }
         console.log(resume.fullname)
@@ -766,8 +777,6 @@ async function loadResumeIntoPreview(resumeId) {
     }
 }
 
-
-
 // Event listener for when a resume is selected from the dropdown
 document.getElementById('existing-resumes').addEventListener('change', function() {
     console.log("Selected resume:", this.value);
@@ -777,11 +786,9 @@ document.getElementById('existing-resumes').addEventListener('change', function(
 
 // Call this function when the modal is opened to populate the dropdown
 populateResumeDropdown();
-
 // Add event listeners
 document.getElementById('template').addEventListener('change', loadResumePreview);
 document.getElementById('resume-preview').addEventListener('click', removeItemFromPreview);
 document.getElementById('save-resume').addEventListener('click', saveResume);
-
 // Load the resume preview when the modal is opened
 openModalBtn.addEventListener('click', loadResumePreview);

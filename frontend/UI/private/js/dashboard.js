@@ -1,11 +1,15 @@
 // Function to load and display the dashboard data
 async function loadDashboardData() {
     try {
+        const options = {
+            credentials: 'include'
+        };
+
         // Make API calls to fetch competencies, experiences, and projects
-        const competenciesResponse = await fetch('http://localhost:8000/competencies');
-        const experiencesResponse = await fetch('http://localhost:8000/experiences');
-        const educationResponse = await fetch('http://localhost:8000/educations');
-        const projectsResponse = await fetch('http://localhost:8000/projects');
+        const competenciesResponse = await fetch('http://localhost:8000/competencies', options);
+        const experiencesResponse = await fetch('http://localhost:8000/experiences', options);
+        const educationResponse = await fetch('http://localhost:8000/educations', options);
+        const projectsResponse = await fetch('http://localhost:8000/projects', options);
 
         if (competenciesResponse.ok && experiencesResponse.ok && projectsResponse.ok && educationResponse.ok) {
             const competencies = await competenciesResponse.json();
@@ -29,17 +33,17 @@ async function loadDashboardData() {
 // Function to update a list in the dashboard
 function updateList(listId, items) {
     const list = document.getElementById(listId);
-    
+
     items.forEach(item => {
         const listItem = document.createElement('li');
-        
+
         // Set the appropriate text content based on the item type
         if (item.name) {
             listItem.textContent = item.name;
         } else if (item.title) {
             listItem.textContent = item.title;
         }
-        
+
         list.appendChild(listItem);
     });
 }
@@ -52,7 +56,8 @@ async function createCompetency(competencyData) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(competencyData)
+            body: JSON.stringify(competencyData),
+            credentials: 'include'
         });
 
         if (response.ok) {
@@ -78,7 +83,8 @@ async function createExperience(experienceData) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(experienceData)
+            body: JSON.stringify(experienceData),
+            credentials: 'include'
         });
 
         if (response.ok) {
@@ -96,7 +102,7 @@ async function createExperience(experienceData) {
     }
 }
 
-// Function to create a new experience
+// Function to create a new education
 async function createEducation(educationData) {
     try {
         const response = await fetch('http://localhost:8000/educations/', {
@@ -104,18 +110,19 @@ async function createEducation(educationData) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(educationData)
+            body: JSON.stringify(educationData),
+            credentials: 'include'
         });
 
         if (response.ok) {
             const newEducation = await response.json();
-            // Append the new experience to the existing list
+            // Append the new education to the existing list
             const educationsList = document.getElementById('education-list');
             const listItem = document.createElement('li');
             listItem.textContent = newEducation.title;
             educationsList.appendChild(listItem);
         } else {
-            console.error('Failed to create experience');
+            console.error('Failed to create education');
         }
     } catch (error) {
         console.error('Error:', error);
@@ -130,7 +137,8 @@ async function createProject(projectData) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(projectData)
+            body: JSON.stringify(projectData),
+            credentials: 'include'
         });
 
         if (response.ok) {

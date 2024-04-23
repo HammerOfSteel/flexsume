@@ -20,7 +20,10 @@ from asyncpg.exceptions import PostgresError  # Correct import for handling erro
 from pydantic import BaseModel, EmailStr, Field
 from fastapi.security import OAuth2AuthorizationCodeBearer
 import os
+import datetime
 import dotenv
+from aiohttp import ClientSession
+import hashlib
 
 # load .env file
 dotenv.load_dotenv()
@@ -39,6 +42,7 @@ CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 AUTHORITY = os.getenv("AUTHORITY")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
 SESSION_SECRET_KEY = os.getenv("SESSION_SECRET_KEY")
+BACKEND_URL = os.getenv("BACKEND_URL")
 
 logger = logging.getLogger(__name__)
 
@@ -117,8 +121,9 @@ async def token(code: str, request: Request):
 
 from jose import jwt, jwk
 
+
 class User(BaseModel):
-    id: str = Field(alias="sub")  # Often 'sub' is used in JWT as the subject (user identifier)
+    sub: str = Field(alias="sub")  # Often 'sub' is used in JWT as the subject (user identifier)
     name: str
     email: str = ""  # Allow empty string for email
 
@@ -132,9 +137,14 @@ class User(BaseModel):
         }
         allow_population_by_field_name = True
 
+class currentUser(BaseModel):
+    id: int  # User ID
+    name: str
+    email: str
+
 import aiohttp
 
-@app.get("/user", response_model=User)
+@app.get("/user", response_model=currentUser)
 async def get_user_info(request: Request):
     user_data = get_user_data_from_session(request)
     if not user_data:
@@ -178,7 +188,25 @@ async def get_user_info(request: Request):
     user_email = decoded_token.get("email")
 
     # Create a User object with the retrieved information
-    user = User(sub=user_id, name=user_name, email=user_email)
+    user_uuid = int(hashlib.sha1(user_id.encode("utf-8")).hexdigest(), 16) % (10 ** 8)
+    user = currentUser(id=user_uuid, name=user_name, email=user_email)
+
+    # URL to your backend endpoint that will receive this user data
+    register_user_url = f"{BACKEND_URL}/users/"  # Update the URL to include the trailing slash
+    backend_url = f"{BACKEND_URL}/user"
+
+    # Sending the user data to the backend
+    async with ClientSession() as session:
+        headers = {'Content-Type': 'application/json'}
+        user_create_data = {"email": user.email, "password": "dummypassword", "first_name": user_name.split()[0], "last_name": user_name.split()[1]}  # Include the required fields
+        response = await session.post(backend_url, json=user.dict(), headers=headers)
+        if response.status != 201:
+            raise HTTPException(status_code=response.status, detail="Backend failed to process the data")
+        response = await session.post(register_user_url, json=user_create_data, headers=headers)
+        if response.status != 200:
+            # if user already exists then move on
+            if response.status == 400:
+                print("User already exists")
 
     return user
 

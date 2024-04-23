@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Request, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.models import Base, User, Competency, Experience, Project, Resume, ResumeSection, Education
@@ -18,10 +19,22 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 from fpdf import FPDF, HTMLMixin
 from io import BytesIO
+from datetime import date
 import html
 import os
 import dotenv
+from starlette.middleware.sessions import SessionMiddleware
+from fastapi import FastAPI, Request, HTTPException, status
+from pydantic import BaseModel
+from starlette.responses import JSONResponse
+from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
+from starlette.status import HTTP_401_UNAUTHORIZED
+from starlette.middleware.sessions import SessionMiddleware
 logging.basicConfig(level=logging.DEBUG)
+
+app = FastAPI()
 
 # load .env file
 dotenv.load_dotenv()
@@ -31,10 +44,13 @@ SAMPLE_USER_FIRSTNAME = os.getenv("SAMPLE_USER_FIRSTNAME")
 SAMPLE_USER_LASTNAME = os.getenv("SAMPLE_USER_LASTNAME")
 SAMPLE_USER_EMAIL = os.getenv("SAMPLE_USER_EMAIL")
 SAMPLE_USER_PASS = os.getenv("SAMPLE_USER_PASS")
+SESSION_SECRET_KEY = os.getenv("SESSION_SECRET_KEY")
 
 models.Base.metadata.create_all(bind=engine)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
-app = FastAPI()
+app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET_KEY)
+
+global userID
 
 # Configure CORS
 origins = [
@@ -313,59 +329,64 @@ class ResumeData(BaseModel):
 class LoginSchema(BaseModel):
     username: str
     password: str
-        
-@app.post("/api/login")
-def login(login_data: LoginSchema):
-
-    # check the User in the database
-    db = SessionLocal()
-    user = db.query(models.User).filter(models.User.email == login_data.username).first()
-    if user is None or not user.check_password(login_data.password):
-        db.close()
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    db.close()
-
-    # Hardcoded username and password
-    valid_username = "user@example.com"
-    valid_password = "password"
-
-    if login_data.username == valid_username and login_data.password == valid_password:
-        # Authentication successful
-        return {"access_token": "dummy_token", "token_type": "bearer"}
-    else:
-        # Authentication failed
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     
 
+class currentUser(BaseModel):
+    id: int  # User ID
+    name: str
+    email: str
+
+@app.post("/user")
+async def receive_user_data(user: currentUser, request: Request):
+    try:
+        request.session['user'] = user.dict()
+        request.session['user_id'] = user.id
+        global userID
+        userID = user.id
+        return JSONResponse(status_code=HTTP_201_CREATED, content={"message": "User data received and session updated"})
+    except AssertionError:
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="SessionMiddleware not installed")
+
+
+def get_current_user(request: Request):
+    user_id = request.session.get('user_id')
+    logging.debug(f"User ID from session: {user_id}")
+    if not user_id:
+        user_id = userID
+        logging.debug(f"User ID now found in session as a global variable {user_id}")
+    return user_id
+
 @app.post("/users/", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db), request: Request = None):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    fake_hashed_password = user.password + "notreallyhashed"
-    db_user = models.User(email=user.email, hashed_password=fake_hashed_password)
+    user_id = get_current_user(request)
+    db_user = models.User(
+        id=user_id,
+        email=user.email,
+        hashed_password=user.password,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        created_at=date.today(),  # Set the created_at field with today's date
+        updated_at=date.today()   # Set the updated_at field with today's date
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
 
 @app.get("/users/", response_model=list[schemas.User])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = db.query(models.User).offset(skip).limit(limit).all()
     return users
 
+
 @app.post("/competencies/", response_model=schemas.Competency)
-def create_competency(competency: schemas.CompetencyCreate, db: Session = Depends(get_db)):
+def create_competency(competency: schemas.CompetencyCreate, db: Session = Depends(get_db), request: Request = None):
     db_competency = models.Competency(**competency.dict())
-    db_competency.user_id = 1  # Set the appropriate user_id
+    db_competency.user_id = get_current_user(request)
     db_competency.created_at = date.today()
     db_competency.updated_at = date.today()
     db.add(db_competency)
@@ -373,15 +394,17 @@ def create_competency(competency: schemas.CompetencyCreate, db: Session = Depend
     db.refresh(db_competency)
     return db_competency
 
+
 @app.get("/competencies/", response_model=list[schemas.Competency])
 def read_competencies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     competencies = db.query(models.Competency).offset(skip).limit(limit).all()
     return competencies
 
+
 @app.post("/experiences/", response_model=schemas.Experience)
-def create_experience(experience: schemas.ExperienceCreate, db: Session = Depends(get_db)):
+def create_experience(experience: schemas.ExperienceCreate, db: Session = Depends(get_db), request: Request = None):
     db_experience = models.Experience(**experience.dict())
-    db_experience.user_id = 1  # Set the appropriate user_id
+    db_experience.user_id = get_current_user(request)
     db_experience.created_at = date.today()
     db_experience.updated_at = date.today()
     db.add(db_experience)
@@ -397,9 +420,9 @@ def read_experiences(skip: int = 0, limit: int = 100, db: Session = Depends(get_
 
 
 @app.post("/educations/", response_model=schemas.Education)
-def create_education(education: schemas.EducationCreate, db: Session = Depends(get_db)):
+def create_education(education: schemas.EducationCreate, db: Session = Depends(get_db), request: Request = None):
     db_education = models.Education(**education.dict())
-    db_education.user_id = 1  # Set the appropriate user_id
+    db_education.user_id = get_current_user(request)
     db_education.created_at = date.today()
     db_education.updated_at = date.today()
     db.add(db_education)
@@ -415,9 +438,9 @@ def read_educations(skip: int = 0, limit: int = 100, db: Session = Depends(get_d
 
 
 @app.post("/projects/", response_model=schemas.Project)
-def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)):
+def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db), request: Request = None):
     db_project = models.Project(**project.dict())
-    db_project.user_id = 1  # Set the appropriate user_id
+    db_project.user_id = get_current_user(request)
     db_project.created_at = date.today()
     db_project.updated_at = date.today()
     db.add(db_project)
@@ -431,9 +454,9 @@ def read_projects(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
     return projects
 
 @app.post("/resumes/", response_model=schemas.Resume)
-def create_resume(resume: schemas.ResumeCreate, db: Session = Depends(get_db)):
+def create_resume(resume: schemas.ResumeCreate, db: Session = Depends(get_db), request: Request = None):
     db_resume = models.Resume(
-        user_id=1,  # You might want to dynamically set this based on logged-in user
+        user_id=get_current_user(request),
         name=resume.name,
         description=resume.description,
         fullname=resume.fullname,
@@ -477,9 +500,9 @@ def read_resume(resume_id: int, db: Session = Depends(get_db)):
     return resume
 
 @app.post("/resume-sections/", response_model=schemas.ResumeSection)
-def create_resume_section(resume_section: schemas.ResumeSectionCreate, db: Session = Depends(get_db)):
+def create_resume_section(resume_section: schemas.ResumeSectionCreate, db: Session = Depends(get_db), request: Request = None):
     db_resume_section = models.ResumeSection(**resume_section.dict())
-    db_resume_section.user_id = 1  # Set the appropriate user_id
+    db_resume_section.user_id = get_current_user(request)
     db_resume_section.created_at = date.today()
     db_resume_section.updated_at = date.today()
     db.add(db_resume_section)
