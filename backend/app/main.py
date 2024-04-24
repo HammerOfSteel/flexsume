@@ -410,7 +410,7 @@ async def read_competencies(request: Request, skip: int = 0, limit: int = 100, d
         raise HTTPException(status_code=400, detail="Invalid user ID format")
 
     # Fetch only competencies that belong to the specified user_id
-    competencies = db.query(models.Competency).filter(models.Competency.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
+    competencies = db.query(models.Competency).filter(models.Competency.user_id.in_([1,user_id])).offset(skip).limit(limit).all()
     return competencies
 
 
@@ -438,7 +438,7 @@ def read_experiences(request: Request, skip: int = 0, limit: int = 100, db: Sess
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    experiences = db.query(models.Experience).filter(models.Experience.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
+    experiences = db.query(models.Experience).filter(models.Experience.user_id.in_([1,user_id])).offset(skip).limit(limit).all()
     return experiences
 
 
@@ -466,7 +466,7 @@ def read_educations(request: Request, skip: int = 0, limit: int = 100, db: Sessi
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    educations = db.query(models.Education).filter(models.Education.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
+    educations = db.query(models.Education).filter(models.Education.user_id.in_([1,user_id])).offset(skip).limit(limit).all()
     return educations
 
 
@@ -493,7 +493,7 @@ def read_projects(request: Request, skip: int = 0, limit: int = 100, db: Session
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    projects = db.query(models.Project).filter(models.Project.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
+    projects = db.query(models.Project).filter(models.Project.user_id.in_([1,user_id])).offset(skip).limit(limit).all()
     return projects
 
 @app.post("/resumes/", response_model=schemas.Resume)
@@ -542,7 +542,7 @@ def read_resumes(request: Request, skip: int = 0, limit: int = 100, db: Session 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    resumes = db.query(models.Resume).filter(models.Resume.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
+    resumes = db.query(models.Resume).filter(models.Resume.user_id.in_([1,user_id])).offset(skip).limit(limit).all()
     return resumes
 
 @app.get("/resumes/{resume_id}", response_model=schemas.Resume)
@@ -556,7 +556,7 @@ def read_resume(request: Request, resume_id: int, db: Session = Depends(get_db))
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    resume = db.query(models.Resume).filter(models.Resume.user_id.in_([0,user_id])).filter(models.Resume.id == resume_id).first()
+    resume = db.query(models.Resume).filter(models.Resume.user_id.in_([1,user_id])).filter(models.Resume.id == resume_id).first()
     if resume is None:
         raise HTTPException(status_code=404, detail="Resume not found")
     return resume
@@ -584,7 +584,7 @@ def read_resume_sections(request: Request, skip: int = 0, limit: int = 100, db: 
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    resume_sections = db.query(models.ResumeSection).filter(models.ResumeSection.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
+    resume_sections = db.query(models.ResumeSection).filter(models.ResumeSection.user_id.in_([1,user_id])).offset(skip).limit(limit).all()
     return resume_sections
 
 # FastAPI route to get a specific competency by ID
@@ -599,7 +599,7 @@ def read_competency(request: Request, competency_id: int, db: Session = Depends(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    competency = db.query(models.Competency).filter(models.Competency.user_id.in_([0,user_id])).filter(models.Competency.id == competency_id).first()
+    competency = db.query(models.Competency).filter(models.Competency.user_id.in_([1,user_id])).filter(models.Competency.id == competency_id).first()
     if competency is None:
         raise HTTPException(status_code=404, detail="Competency not found")
     return competency
@@ -616,7 +616,7 @@ def read_experience(request: Request, experience_id: int, db: Session = Depends(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    experience = db.query(models.Experience).filter(models.Experience.user_id.in_([0,user_id])).filter(models.Experience.id == experience_id).first()
+    experience = db.query(models.Experience).filter(models.Experience.user_id.in_([1,user_id])).filter(models.Experience.id == experience_id).first()
     if experience is None:
         raise HTTPException(status_code=404, detail="Experience not found")
     return experience
@@ -633,7 +633,7 @@ def read_education(request: Request, education_id: int, db: Session = Depends(ge
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    education = db.query(models.Education).filter(models.Education.user_id.in_([0,user_id])).filter(models.Education.id == education_id).first()
+    education = db.query(models.Education).filter(models.Education.user_id.in_([1,user_id])).filter(models.Education.id == education_id).first()
     if education is None:
         raise HTTPException(status_code=404, detail="Education not found")
     return education
@@ -650,7 +650,7 @@ def read_project(request: Request, project_id: int, db: Session = Depends(get_db
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    project = db.query(models.Project).filter(models.Project.user_id.in_([0,user_id])).filter(models.Project.id == project_id).first()
+    project = db.query(models.Project).filter(models.Project.user_id.in_([1,user_id])).filter(models.Project.id == project_id).first()
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
@@ -667,7 +667,7 @@ def read_competency(request: Request, competency_id: int, db: Session = Depends(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID format")
     
-    competency = db.query(models.Competency).filter(models.Competency.user_id.in_([0,user_id])).filter(models.Competency.id == competency_id).first()
+    competency = db.query(models.Competency).filter(models.Competency.user_id.in_([1,user_id])).filter(models.Competency.id == competency_id).first()
     if competency is None:
         raise HTTPException(status_code=404, detail="Competency not found")
     return competency
