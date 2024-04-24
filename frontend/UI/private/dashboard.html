@@ -15,6 +15,30 @@
     <link href="https://fonts.cdnfonts.com/css/barlow-condensed" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/barlow" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/georgia" rel="stylesheet">
+    <script>
+
+        fetch('/user')
+            .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Failed to fetch user data');
+            }
+            })
+            .then(userData => {
+            document.getElementById('user-name').textContent = userData.name || 'N/A';
+            document.getElementById('user-email').textContent = userData.email || 'N/A';
+            document.getElementById('user-id').textContent = userData.id || 'N/A';
+            })
+            .catch(error => {
+            console.error('Error:', error.message);
+            // Display an error message to the user
+            const errorMessage = document.createElement('p');
+            errorMessage.textContent = 'Failed to retrieve user information. Please try again later.';
+            document.body.appendChild(errorMessage);
+            });
+
+    </script>
     <style>
         body, html {
             height: 100%;
@@ -136,6 +160,7 @@
         <div id="user-profile">
             <h3 id="user-name">Loading...</h3>
             <p id="user-email">Loading...</p>
+            <p style="visibility: hidden;" id="user-id">Loading...</p>
         </div>
         <h1>Welcome to Flexsume!</h1>
         <div id="dashboard">
@@ -231,6 +256,12 @@
     <script src="/js/dashboard"></script>
     <script src="/js/creator"></script>
     <script>
+        function getCurrentUser() {
+            const currenUserId = document.getElementById('user-id').textContent;
+            const userInt = Number(currenUserId)
+            return userInt
+        }
+
         window.html2canvas = html2canvas;
         var jsPDF;
         window.onload = function() {
@@ -360,29 +391,6 @@
             // Show remove buttons again after generating PDF
             document.querySelectorAll(".remove-item").forEach(item => item.style.display = "block");
         }
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-        fetch('/user')
-            .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Failed to fetch user data');
-            }
-            })
-            .then(userData => {
-            document.getElementById('user-name').textContent = userData.name || 'N/A';
-            document.getElementById('user-email').textContent = userData.email || 'N/A';
-            })
-            .catch(error => {
-            console.error('Error:', error.message);
-            // Display an error message to the user
-            const errorMessage = document.createElement('p');
-            errorMessage.textContent = 'Failed to retrieve user information. Please try again later.';
-            document.body.appendChild(errorMessage);
-            });
-        });
     </script>
 </body>
 </html>

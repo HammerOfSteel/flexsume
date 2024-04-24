@@ -4,6 +4,11 @@ let experiences = [];
 let educations = [];
 let projects = [];
 
+function getCurrentUser() {
+    const currenUserId = document.getElementById('user-id').textContent;
+    return currenUserId
+}
+
 // Get the modal element
 const modal = document.getElementById('creator-modal');
 
@@ -32,22 +37,26 @@ window.addEventListener('click', (event) => {
 
 // Function to load and display the resume preview in the modal
 async function loadResumePreview() {
-    try {
-        const options = {
-            credentials: 'include'
-        };
+    const options = {
+        method: 'GET',  // Explicitly define the method for clarity
+        credentials: 'include',  // Include credentials for session handling
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    };
 
-        // Make API calls to fetch competencies, experiences, and projects
+    try {
+        // Make API calls to fetch competencies, experiences, educations, and projects
         const competenciesResponse = await fetch('http://localhost:8000/competencies', options);
         const experiencesResponse = await fetch('http://localhost:8000/experiences', options);
         const educationsResponse = await fetch('http://localhost:8000/educations', options);
         const projectsResponse = await fetch('http://localhost:8000/projects', options);
 
-        if (competenciesResponse.ok && experiencesResponse.ok && projectsResponse.ok) {
-            competencies = await competenciesResponse.json();
-            experiences = await experiencesResponse.json();
-            educations = await educationsResponse.json();
-            projects = await projectsResponse.json();
+        if (competenciesResponse.ok && experiencesResponse.ok && projectsResponse.ok && educationsResponse.ok) {
+            const competencies = await competenciesResponse.json();
+            const experiences = await experiencesResponse.json();
+            const educations = await educationsResponse.json();
+            const projects = await projectsResponse.json();
             console.log(competencies, experiences, educations, projects);
 
             // Generate the resume preview HTML based on the selected template
@@ -57,11 +66,17 @@ async function loadResumePreview() {
             document.getElementById('resume-preview').innerHTML = resumePreviewHTML;
         } else {
             console.error('Failed to load resume data');
+            // Detailed error messages for debugging
+            if (!competenciesResponse.ok) console.error('Failed to load competencies');
+            if (!experiencesResponse.ok) console.error('Failed to load experiences');
+            if (!educationsResponse.ok) console.error('Failed to load educations');
+            if (!projectsResponse.ok) console.error('Failed to load projects');
         }
     } catch (error) {
         console.error('Error:', error);
     }
 }
+
 
 // Function to generate the resume preview HTML based on the selected template
 function generateResumePreview(competencies, experiences, educations, projects) {
@@ -668,11 +683,10 @@ async function saveResume() {
 
     try {
         console.log('Sending resume data:', resumeData);
-
         const response = await fetch('http://localhost:8000/resumes/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(resumeData),
             credentials: 'include'
@@ -700,8 +714,13 @@ async function populateResumeDropdown() {
     const dropdown = document.getElementById('existing-resumes');
     try {
         const response = await fetch('http://localhost:8000/resumes/', {
-            credentials: 'include'
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
+        if (!response.ok) throw new Error('Failed to fetch resumes');
         const resumes = await response.json();
 
         // Clear the dropdown
@@ -718,10 +737,14 @@ async function populateResumeDropdown() {
     }
 }
 
-
+// Function to load section details
 async function loadSectionDetails(sectionType, sectionId) {
     const response = await fetch(`http://localhost:8000/${sectionType}s/${sectionId}`, {
-        credentials: 'include'
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        }
     });
     if (response.ok) {
         return response.json();
@@ -730,19 +753,24 @@ async function loadSectionDetails(sectionType, sectionId) {
     }
 }
 
+// Function to load resume into preview
 async function loadResumeIntoPreview(resumeId) {
     try {
         const response = await fetch(`http://localhost:8000/resumes/${resumeId}`, {
-            credentials: 'include'
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
         if (!response.ok) throw new Error('Failed to fetch resume data');
         const resume = await response.json();
 
         // Reset the arrays
-        competencies = [];
-        experiences = [];
-        educations = [];
-        projects = [];
+        let competencies = [];
+        let experiences = [];
+        let educations = [];
+        let projects = [];
 
         // Load details for each section
         for (const section of resume.sections) {
@@ -751,17 +779,14 @@ async function loadResumeIntoPreview(resumeId) {
             if (section.section_type === 'competency') {
                 competencies.push(details);
             } else if (section.section_type === 'experience') {
-            experiences.push(details);
+                experiences.push(details);
             } else if (section.section_type === 'education') {
-            educations.push(details);
+                educations.push(details);
             } else if (section.section_type === 'project') {
-            projects.push(details);
+                projects.push(details);
             }
         }
-        console.log(resume.fullname)
-        console.log(resume.jobtitle)
-        console.log(resume.summary)
-        console.log(resume.jobtitledescription)
+
         // Generate the resume preview
         const resumePreviewHTML = generateResumePreview(competencies, experiences, educations, projects);
         document.getElementById('resume-preview').innerHTML = resumePreviewHTML;

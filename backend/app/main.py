@@ -51,6 +51,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET_KEY)
 
 global userID
+if userID is None:
+    userID = 1
 
 # Configure CORS
 origins = [
@@ -385,8 +387,9 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 
 @app.post("/competencies/", response_model=schemas.Competency)
 def create_competency(competency: schemas.CompetencyCreate, db: Session = Depends(get_db), request: Request = None):
+    user_id = userID 
     db_competency = models.Competency(**competency.dict())
-    db_competency.user_id = get_current_user(request)
+    db_competency.user_id = int(user_id)
     db_competency.created_at = date.today()
     db_competency.updated_at = date.today()
     db.add(db_competency)
@@ -396,15 +399,26 @@ def create_competency(competency: schemas.CompetencyCreate, db: Session = Depend
 
 
 @app.get("/competencies/", response_model=list[schemas.Competency])
-def read_competencies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    competencies = db.query(models.Competency).offset(skip).limit(limit).all()
+async def read_competencies(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    # Fetch only competencies that belong to the specified user_id
+    competencies = db.query(models.Competency).filter(models.Competency.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
     return competencies
 
 
 @app.post("/experiences/", response_model=schemas.Experience)
 def create_experience(experience: schemas.ExperienceCreate, db: Session = Depends(get_db), request: Request = None):
+    user_id = userID
     db_experience = models.Experience(**experience.dict())
-    db_experience.user_id = get_current_user(request)
+    db_experience.user_id = int(user_id)
     db_experience.created_at = date.today()
     db_experience.updated_at = date.today()
     db.add(db_experience)
@@ -414,15 +428,25 @@ def create_experience(experience: schemas.ExperienceCreate, db: Session = Depend
 
 
 @app.get("/experiences/", response_model=list[schemas.Experience])
-def read_experiences(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    experiences = db.query(models.Experience).offset(skip).limit(limit).all()
+def read_experiences(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    experiences = db.query(models.Experience).filter(models.Experience.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
     return experiences
 
 
 @app.post("/educations/", response_model=schemas.Education)
 def create_education(education: schemas.EducationCreate, db: Session = Depends(get_db), request: Request = None):
+    user_id = userID
     db_education = models.Education(**education.dict())
-    db_education.user_id = get_current_user(request)
+    db_education.user_id = int(user_id)
     db_education.created_at = date.today()
     db_education.updated_at = date.today()
     db.add(db_education)
@@ -432,15 +456,25 @@ def create_education(education: schemas.EducationCreate, db: Session = Depends(g
 
 
 @app.get("/educations/", response_model=list[schemas.Education])
-def read_educations(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    educations = db.query(models.Education).offset(skip).limit(limit).all()
+def read_educations(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    educations = db.query(models.Education).filter(models.Education.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
     return educations
 
 
 @app.post("/projects/", response_model=schemas.Project)
 def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db), request: Request = None):
+    user_id = userID
     db_project = models.Project(**project.dict())
-    db_project.user_id = get_current_user(request)
+    db_project.user_id = int(user_id)
     db_project.created_at = date.today()
     db_project.updated_at = date.today()
     db.add(db_project)
@@ -449,14 +483,24 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)
     return db_project
 
 @app.get("/projects/", response_model=list[schemas.Project])
-def read_projects(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    projects = db.query(models.Project).offset(skip).limit(limit).all()
+def read_projects(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    projects = db.query(models.Project).filter(models.Project.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
     return projects
 
 @app.post("/resumes/", response_model=schemas.Resume)
 def create_resume(resume: schemas.ResumeCreate, db: Session = Depends(get_db), request: Request = None):
+    user_id = userID
     db_resume = models.Resume(
-        user_id=get_current_user(request),
+        user_id=int(user_id),
         name=resume.name,
         description=resume.description,
         fullname=resume.fullname,
@@ -488,21 +532,40 @@ def create_resume(resume: schemas.ResumeCreate, db: Session = Depends(get_db), r
 
 
 @app.get("/resumes/", response_model=list[schemas.Resume])
-def read_resumes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    resumes = db.query(models.Resume).offset(skip).limit(limit).all()
+def read_resumes(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    resumes = db.query(models.Resume).filter(models.Resume.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
     return resumes
 
 @app.get("/resumes/{resume_id}", response_model=schemas.Resume)
-def read_resume(resume_id: int, db: Session = Depends(get_db)):
-    resume = db.query(models.Resume).filter(models.Resume.id == resume_id).first()
+def read_resume(request: Request, resume_id: int, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    resume = db.query(models.Resume).filter(models.Resume.user_id.in_([0,user_id])).filter(models.Resume.id == resume_id).first()
     if resume is None:
         raise HTTPException(status_code=404, detail="Resume not found")
     return resume
 
 @app.post("/resume-sections/", response_model=schemas.ResumeSection)
 def create_resume_section(resume_section: schemas.ResumeSectionCreate, db: Session = Depends(get_db), request: Request = None):
+    user_id = userID
     db_resume_section = models.ResumeSection(**resume_section.dict())
-    db_resume_section.user_id = get_current_user(request)
+    db_resume_section.user_id = int(user_id)
     db_resume_section.created_at = date.today()
     db_resume_section.updated_at = date.today()
     db.add(db_resume_section)
@@ -511,46 +574,100 @@ def create_resume_section(resume_section: schemas.ResumeSectionCreate, db: Sessi
     return db_resume_section
 
 @app.get("/resume-sections/", response_model=list[schemas.ResumeSection])
-def read_resume_sections(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    resume_sections = db.query(models.ResumeSection).offset(skip).limit(limit).all()
+def read_resume_sections(request: Request, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    resume_sections = db.query(models.ResumeSection).filter(models.ResumeSection.user_id.in_([0,user_id])).offset(skip).limit(limit).all()
     return resume_sections
 
 # FastAPI route to get a specific competency by ID
 @app.get("/competencies/{competency_id}", response_model=schemas.Competency)
-def read_competency(competency_id: int, db: Session = Depends(get_db)):
-    competency = db.query(models.Competency).filter(models.Competency.id == competency_id).first()
+def read_competency(request: Request, competency_id: int, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    competency = db.query(models.Competency).filter(models.Competency.user_id.in_([0,user_id])).filter(models.Competency.id == competency_id).first()
     if competency is None:
         raise HTTPException(status_code=404, detail="Competency not found")
     return competency
 
 # FastAPI route to get a specific experience by ID
 @app.get("/experiences/{experience_id}", response_model=schemas.Experience)
-def read_experience(experience_id: int, db: Session = Depends(get_db)):
-    experience = db.query(models.Experience).filter(models.Experience.id == experience_id).first()
+def read_experience(request: Request, experience_id: int, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    experience = db.query(models.Experience).filter(models.Experience.user_id.in_([0,user_id])).filter(models.Experience.id == experience_id).first()
     if experience is None:
         raise HTTPException(status_code=404, detail="Experience not found")
     return experience
 
 # FastAPI route to get a specific education by ID
 @app.get("/educations/{education_id}", response_model=schemas.Education)
-def read_education(education_id: int, db: Session = Depends(get_db)):
-    education = db.query(models.Education).filter(models.Education.id == education_id).first()
+def read_education(request: Request, education_id: int, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    education = db.query(models.Education).filter(models.Education.user_id.in_([0,user_id])).filter(models.Education.id == education_id).first()
     if education is None:
         raise HTTPException(status_code=404, detail="Education not found")
     return education
 
 # FastAPI route to get a specific project by ID
 @app.get("/projects/{project_id}", response_model=schemas.Project)
-def read_project(project_id: int, db: Session = Depends(get_db)):
-    project = db.query(models.Project).filter(models.Project.id == project_id).first()
+def read_project(request: Request, project_id: int, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    project = db.query(models.Project).filter(models.Project.user_id.in_([0,user_id])).filter(models.Project.id == project_id).first()
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
 
 # FastAPI route to get a specific competency by ID
 @app.get("/competencys/{competency_id}", response_model=schemas.Competency)
-def read_competency(competency_id: int, db: Session = Depends(get_db)):
-    competency = db.query(models.Competency).filter(models.Competency.id == competency_id).first()
+def read_competency(request: Request, competency_id: int, db: Session = Depends(get_db)):
+    # Extracting user ID from the request header
+    user_id = userID
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID header is missing")
+    try:
+        user_id = int(user_id)  # Ensure the user_id is an integer
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+    
+    competency = db.query(models.Competency).filter(models.Competency.user_id.in_([0,user_id])).filter(models.Competency.id == competency_id).first()
     if competency is None:
         raise HTTPException(status_code=404, detail="Competency not found")
     return competency

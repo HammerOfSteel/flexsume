@@ -1,17 +1,28 @@
 // Function to load and display the dashboard data
+function getCurrentUser() {
+    const currenUserId = document.getElementById('user-id').textContent;
+    return currenUserId
+}
+
+
 async function loadDashboardData() {
     try {
+        // Assuming getCurrentUser() correctly retrieves the current user's ID
         const options = {
-            credentials: 'include'
+            method: 'GET',  // Specify the method if not default (GET)
+            credentials: 'include',  // Include credentials for cookies, etc.
+            headers: {
+                'Content-Type': 'application/json',
+            }
         };
 
-        // Make API calls to fetch competencies, experiences, and projects
+        // Make API calls to fetch competencies, experiences, educations, and projects
         const competenciesResponse = await fetch('http://localhost:8000/competencies', options);
         const experiencesResponse = await fetch('http://localhost:8000/experiences', options);
         const educationResponse = await fetch('http://localhost:8000/educations', options);
         const projectsResponse = await fetch('http://localhost:8000/projects', options);
 
-        if (competenciesResponse.ok && experiencesResponse.ok && projectsResponse.ok && educationResponse.ok) {
+        if (competenciesResponse.ok && experiencesResponse.ok && educationResponse.ok && projectsResponse.ok) {
             const competencies = await competenciesResponse.json();
             const experiences = await experiencesResponse.json();
             const educations = await educationResponse.json();
@@ -24,11 +35,17 @@ async function loadDashboardData() {
             updateList('projects-list', projects);
         } else {
             console.error('Failed to load dashboard data');
+            // Optionally, log more specific error info
+            console.error('Competencies status:', competenciesResponse.status);
+            console.error('Experiences status:', experiencesResponse.status);
+            console.error('Educations status:', educationResponse.status);
+            console.error('Projects status:', projectsResponse.status);
         }
     } catch (error) {
         console.error('Error:', error);
     }
 }
+
 
 // Function to update a list in the dashboard
 function updateList(listId, items) {
@@ -54,7 +71,7 @@ async function createCompetency(competencyData) {
         const response = await fetch('http://localhost:8000/competencies/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(competencyData),
             credentials: 'include'
@@ -81,7 +98,7 @@ async function createExperience(experienceData) {
         const response = await fetch('http://localhost:8000/experiences/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(experienceData),
             credentials: 'include'
@@ -108,7 +125,7 @@ async function createEducation(educationData) {
         const response = await fetch('http://localhost:8000/educations/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(educationData),
             credentials: 'include'
@@ -135,7 +152,7 @@ async function createProject(projectData) {
         const response = await fetch('http://localhost:8000/projects/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(projectData),
             credentials: 'include'
